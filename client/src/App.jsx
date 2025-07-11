@@ -136,7 +136,7 @@ export default function App() {
               });
             }
           }}
-          className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col gap-6 w-96 p-12 border border-white/20"
+          className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col gap-6 w-[500px] p-16 border border-white/20"
         >
           <h1 className="text-5xl font-bold text-center mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
              Prompt Mafia
