@@ -58,7 +58,6 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
             {isEliminated ? (
               <div className="w-full h-full bg-gradient-to-br from-gray-900/50 to-gray-800/50 flex flex-col items-center justify-center">
                 <div className="text-center">
-                  <div className="text-gray-400 text-2xl font-bold mb-2">💀</div>
                   <p className="text-gray-300 text-lg font-bold">
                     JOUEUR ÉLIMINÉ
                   </p>
