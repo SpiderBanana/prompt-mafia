@@ -1,4 +1,3 @@
-// filepath: c:\Users\Home\Downloads\prompt-mafia\client\src\components\VoteZone.jsx
 import { motion } from "framer-motion";
 
 export default function VoteZone({ players, votes = [], onVote, selected, disabled, onConfirm, hasConfirmed }) {
@@ -10,7 +9,7 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
   return (
     <div className="space-y-6">
       {/* Zone de sélection des joueurs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {players.map((p, index) => {
           const voteCount = getVoteCount(p.id);
           const isSelected = selected === p.id;
@@ -21,15 +20,15 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`cursor-pointer group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
+              className={`cursor-pointer group relative overflow-hidden rounded-xl border transition-all duration-300 ${
                 isSelected 
-                  ? "border-red-500 bg-gradient-to-br from-red-50 to-red-100 shadow-lg shadow-red-500/25" 
-                  : "border-gray-200 bg-white hover:border-red-300 hover:shadow-md"
+                  ? "border-red-400/60 bg-red-500/20 backdrop-blur-lg shadow-lg shadow-red-500/25" 
+                  : "border-white/20 bg-white/10 backdrop-blur-lg hover:border-red-300/40 hover:bg-white/20"
               } ${disabled && !isSelected && "opacity-50 cursor-not-allowed"}
                 ${hasConfirmed && "opacity-60 cursor-not-allowed"}
               `}
-              whileHover={!disabled && !hasConfirmed ? { scale: 1.02, y: -2 } : {}}
-              whileTap={!disabled && !hasConfirmed ? { scale: 0.98 } : {}}
+              whileHover={!disabled && !hasConfirmed ? { scale: 1.05 } : {}}
+              whileTap={!disabled && !hasConfirmed ? { scale: 0.95 } : {}}
             >
               <input
                 type="radio"
@@ -40,19 +39,19 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
                 onChange={() => !disabled && !hasConfirmed && onVote(p.id)}
                 className="sr-only"
               />
-                <div className="p-6 text-center">
+              <div className="p-3 text-center">
                 {/* Nom du joueur */}
-                <div className={`font-bold text-xl mb-3 ${isSelected ? 'text-red-700' : 'text-gray-800'}`}>
+                <div className={`font-medium text-sm mb-2 ${isSelected ? 'text-red-200' : 'text-white'}`}>
                   {p.username}
                 </div>
                 
                 {/* Compteur de votes */}
-                <div className={`text-sm px-3 py-1 rounded-full inline-block ${
+                <div className={`text-xs px-2 py-1 rounded-full inline-block ${
                   voteCount > 0 
-                    ? 'bg-red-100 text-red-700 font-medium' 
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-red-400/30 text-red-200 font-medium backdrop-blur' 
+                    : 'bg-white/20 text-gray-300 backdrop-blur'
                 }`}>
-                  {voteCount > 0 ? `${voteCount} vote${voteCount > 1 ? 's' : ''}` : 'Aucun vote'}
+                  {voteCount > 0 ? `${voteCount}` : '0'}
                 </div>
               </div>
               
@@ -61,14 +60,11 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
                 <motion.div 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg"
+                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg"
                 >
                   ✓
                 </motion.div>
               )}
-              
-              {/* Effet de brillance */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
             </motion.label>
           );
         })}
@@ -78,15 +74,15 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ delay: players.length * 0.1 }}
-          className={`cursor-pointer group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
+          className={`cursor-pointer group relative overflow-hidden rounded-xl border transition-all duration-300 ${
             selected === "skip" 
-              ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg shadow-blue-500/25" 
-              : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-md"
+              ? "border-blue-400/60 bg-blue-500/20 backdrop-blur-lg shadow-lg shadow-blue-500/25" 
+              : "border-white/20 bg-white/10 backdrop-blur-lg hover:border-blue-300/40 hover:bg-white/20"
           } ${disabled && selected !== "skip" && "opacity-50 cursor-not-allowed"}
             ${hasConfirmed && "opacity-60 cursor-not-allowed"}
           `}
-          whileHover={!disabled && !hasConfirmed ? { scale: 1.02, y: -2 } : {}}
-          whileTap={!disabled && !hasConfirmed ? { scale: 0.98 } : {}}
+          whileHover={!disabled && !hasConfirmed ? { scale: 1.05 } : {}}
+          whileTap={!disabled && !hasConfirmed ? { scale: 0.95 } : {}}
         >
           <input
             type="radio"
@@ -98,24 +94,14 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
             className="sr-only"
           />
           
-          <div className="p-6 text-center">
-            {/* Icône */}
-            <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl ${
-              selected === "skip" 
-                ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white' 
-                : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600'
-            }`}>
-              ⏭️
+          <div className="p-3 text-center">
+            {/* Icône et texte */}
+            <div className={`text-lg mb-1 ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
+              &gt;&gt;
             </div>
             
-            {/* Texte */}
-            <div className={`font-bold text-lg mb-2 ${selected === "skip" ? 'text-blue-700' : 'text-gray-800'}`}>
-              Passer le tour
-            </div>
-            
-            {/* Description */}
-            <div className="text-xs text-gray-500">
-              Ne pas éliminer
+            <div className={`font-medium text-xs ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
+              Passer
             </div>
           </div>
           
@@ -124,14 +110,11 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg"
+              className="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg"
             >
               ✓
             </motion.div>
           )}
-          
-          {/* Effet de brillance */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
         </motion.label>
       </div>
       
@@ -146,9 +129,9 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
             onClick={() => onConfirm && onConfirm(selected)}
             className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105"
           >
-            🗳️ Confirmer mon vote
+            Confirmer mon vote
           </button>
-          <p className="text-sm text-gray-500 mt-3">
+          <p className="text-sm text-yellow-500 mt-3">
             ⚠️ Attention : une fois confirmé, vous ne pourrez plus changer votre vote !
           </p>
         </motion.div>
@@ -163,7 +146,7 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
         >
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-800 px-6 py-4 rounded-2xl inline-block shadow-lg">
             <div className="flex items-center space-x-2">
-              <span className="text-2xl">✅</span>
+              
               <div>
                 <span className="font-bold text-lg">Vote confirmé !</span>
                 {selected && selected !== "skip" && (

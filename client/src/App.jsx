@@ -43,7 +43,8 @@ export default function App() {
     });    socket.on("start_turn", ({ currentPlayerId, order }) => {
       setCurrentPlayerId(currentPlayerId);
       setOrder(order);
-      setIsPromptSubmitted(false); // Réinitialiser l'état de soumission pour le nouveau tour
+      setIsPromptSubmitted(false); 
+      setPhase("PROMPT"); 
     });
     socket.on("new_image_broadcast", (card) => setCards((prev) => [...prev, card]));
     socket.on("start_discussion", () => {
@@ -78,6 +79,8 @@ export default function App() {
       setVoteSelected(null);
       setVoteConfirmed(false);
       setRoundResult(null);
+      setIsPromptSubmitted(false); 
+      setPhase("PROMPT"); 
     });
       return () => {
       socket.off("update_players");
@@ -92,24 +95,25 @@ export default function App() {
       socket.off("game_over");
       socket.off("new_round");
     };
-  }, []);  // Fonction pour redémarrer une nouvelle partie
+  }, []);  
   const restartGame = () => {
     // Réinitialiser tous les états du jeu
     setCurrentPlayerId(null);
     setMyWord("");
     setOrder([]);
     setCards([]);
-    setPhase("WAITING");    setVotes([]);
+    setPhase("WAITING");
+    setVotes([]);
     setVoteSelected(null);
-    setVoteConfirmed(false);    setResult(null);
+    setVoteConfirmed(false);
+    setResult(null);
     setIsPromptSubmitted(false);
     setEliminatedPlayers([]);
     setRound(1);
     setRoundResult(null);
     setRevealedCards([]);
     
-    // Démarrer une nouvelle partie
-    socket.emit("start_game", { roomId });
+
   };
 
   // Vérifier si le joueur actuel est éliminé
@@ -118,7 +122,7 @@ export default function App() {
   // Écran de connexion
   if (!joined) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center">
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -128,25 +132,27 @@ export default function App() {
               });
             }
           }}
-          className="bg-white p-8 rounded-xl shadow-2xl flex flex-col gap-6 w-96"
+          className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col gap-6 w-96 p-12 border border-white/20"
         >
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">🎯 Prompt Mafia</h1>
+          <h1 className="text-5xl font-bold text-center mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+             Prompt Mafia
+          </h1>
           <input 
-            className="border-2 border-gray-300 p-3 rounded-lg focus:border-blue-500 focus:outline-none" 
+            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
             value={roomId} 
             onChange={e => setRoomId(e.target.value)} 
             placeholder="Nom de la room..." 
             required
           />
           <input 
-            className="border-2 border-gray-300 p-3 rounded-lg focus:border-blue-500 focus:outline-none" 
+            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
             value={username} 
             onChange={e => setUsername(e.target.value)} 
             placeholder="Votre pseudo..." 
             required
           />
-          <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg p-3 transition-colors">
-            🚀 Rejoindre la partie
+          <button className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold rounded-xl py-4 px-8 text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
+            Rejoindre la partie
           </button>
         </form>
       </div>
@@ -155,8 +161,8 @@ export default function App() {
   // Interface principale du jeu
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
-      <div className="container mx-auto p-4 h-screen flex gap-6">
-        {/* Sidebar gauche - Joueurs */}        <PlayerSidebar 
+      <div className="container mx-auto p-4 min-h-screen flex gap-6 pr-96">
+        <PlayerSidebar 
           players={players}
           currentPlayerId={currentPlayerId}
           myWord={myWord}
@@ -170,7 +176,7 @@ export default function App() {
             <div className="flex-1 flex items-center justify-center">
               <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-12 text-center border border-white/20">
                 <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  🎯 Prompt Mafia
+                   Prompt Mafia
                 </h1>
                 <div className="mb-8">
                   <h2 className="text-2xl font-semibold mb-6 text-white">
@@ -189,9 +195,9 @@ export default function App() {
                   {players.length >= 3 ? (
                     <button
                       onClick={() => socket.emit("start_game", { roomId })}
-                      className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-12 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                      className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-4 px-12 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
                     >
-                      🚀 Démarrer la partie
+                      Démarrer la partie
                     </button>
                   ) : (
                     <p className="text-gray-300 text-xl">
@@ -209,7 +215,7 @@ export default function App() {
               {/* Header de jeu */}
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
                 <h1 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  🎯 Prompt Mafia
+                   Prompt Mafia
                 </h1>
                 
                 {/* Notification du tour actuel */}
@@ -217,7 +223,7 @@ export default function App() {
                   <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 p-4 rounded-xl">
                     <div className="flex items-center justify-center">
                       <div className="flex-shrink-0">
-                        <span className="text-3xl">🎯</span>
+                        <span className="text-3xl"></span>
                       </div>
                       <div className="ml-3 text-center">
                         <p className="text-xl font-medium text-blue-200">
@@ -251,18 +257,19 @@ export default function App() {
                       setIsPromptSubmitted(true);
                     }}
                     isSubmitted={isPromptSubmitted}
+                    myWord={myWord}
                   />
                 )}
                 
                 {/* Phase de discussion et vote */}
                 {phase === "DISCUSSION" && (                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
-                    <h2 className="text-3xl font-bold text-center mb-6 text-white">💬 Phase de Discussion</h2>
+                    <h2 className="text-3xl font-bold text-center mb-6 text-white">Phase de Discussion</h2>
                     <Timer duration={60} onEnd={() => {
                       // Forcer la fin du vote quand le timer se termine
                       socket.emit("force_vote_end", { roomId });
                     }} />
                     <div className="mt-8">
-                      <h3 className="text-2xl font-semibold mb-6 text-center text-white">🗳️ Votez pour l'intrus :</h3>                      <VoteZone
+                      <h3 className="text-2xl font-semibold mb-6 text-center text-white">Votez pour l'intrus :</h3>                      <VoteZone
                         players={players}
                         votes={votes}
                         onVote={pid => {
@@ -287,8 +294,8 @@ export default function App() {
                   <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 text-center border border-white/20">
                     <h2 className="text-4xl font-bold mb-6 text-white">
                       {result.intruderFound
-                        ? "🎉 L'intrus a été découvert !"
-                        : "😈 L'intrus est passé inaperçu..."}
+                        ? "L'intrus a été découvert !"
+                        : "L'intrus est passé inaperçu..."}
                     </h2>
                     <div className="text-2xl mt-6 text-white">
                       L'intrus était : <span className="font-bold text-red-400">{result.intruder.username}</span>
@@ -307,15 +314,7 @@ export default function App() {
                       </div>
                     </div>
                     
-                    {/* Bouton pour relancer une partie */}
-                    <div className="mt-10">
-                      <button
-                        onClick={restartGame}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
-                      >
-                        🔄 Nouvelle partie
-                      </button>
-                    </div>
+                    
                   </div>
                 )}
                 
@@ -365,8 +364,8 @@ export default function App() {
                   <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 text-center border border-white/20">
                     <h2 className="text-4xl font-bold mb-6 text-white">
                       {result.winner === "non-intruders" 
-                        ? "🎉 Les Innocents ont gagné !" 
-                        : "😈 L'Intrus a gagné !"}
+                        ? "Les Innocents ont gagné !" 
+                        : "L'Intrus a gagné !"}
                     </h2>
                     
                     {result.eliminatedPlayer && (
@@ -401,22 +400,15 @@ export default function App() {
                       })}
                     </div>
                     
-                    <div className="mt-6">
-                      <h3 className="text-lg font-semibold mb-2 text-white">Joueurs éliminés par round :</h3>
-                      {eliminatedPlayers.map((player, index) => (
-                        <div key={player.id} className="text-sm text-gray-300">
-                          Round {index + 1}: {player.username} {player.isIntruder ? "(Intrus)" : "(Innocent)"}
-                        </div>
-                      ))}
-                    </div>
+
                     
-                    {/* Bouton pour relancer une partie */}
+                    {/* Bouton pour retourner à l'écran d'attente */}
                     <div className="mt-10">
                       <button
                         onClick={restartGame}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                        className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-4 px-8 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
                       >
-                        🔄 Nouvelle partie
+                        Retour au lobby
                       </button>
                     </div>
                   </div>
@@ -427,8 +419,8 @@ export default function App() {
         </div>
         
         {/* Sidebar droite - Chat */}
-        <div className="w-80 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col">
-          <h3 className="font-bold text-2xl mb-4 text-center text-white">💬 Chat</h3>
+        <div className="w-80 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col fixed right-4 top-4 h-[80vh]">
+          <h3 className="font-bold text-2xl mb-4 text-center text-white">Chat</h3>
           <div className="flex-1">
             <ChatBox 
               messages={chat} 
@@ -442,14 +434,59 @@ export default function App() {
 }
 
 // Composant formulaire de prompt
-function PromptForm({ onSubmit, isSubmitted }) {
+function PromptForm({ onSubmit, isSubmitted, myWord }) {
   const [prompt, setPrompt] = useState("");
+  const [error, setError] = useState("");
+  
+  // Vérifier si le mot-clé est présent dans le prompt
+  const checkForForbiddenWord = (text) => {
+    if (!myWord) return false;
+    
+    // Nettoyer le texte et le mot pour une comparaison insensible à la casse
+    const cleanText = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const cleanWord = myWord.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    // Vérifier si le mot exact ou ses variantes sont présents
+    const wordVariations = [
+      cleanWord,
+      cleanWord + 's', // pluriel
+      cleanWord + 'e', // féminin
+      cleanWord + 'es', // féminin pluriel
+    ];
+    
+    return wordVariations.some(variation => 
+      cleanText.includes(variation) || 
+      cleanText.split(/\W+/).includes(variation)
+    );
+  };
+  
+  const handlePromptChange = (e) => {
+    const newPrompt = e.target.value;
+    setPrompt(newPrompt);
+    
+    if (checkForForbiddenWord(newPrompt)) {
+      setError(`⚠️ Vous ne pouvez pas utiliser le mot "${myWord}" dans votre prompt !`);
+    } else {
+      setError("");
+    }
+  };
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (prompt.trim() && !checkForForbiddenWord(prompt)) {
+      onSubmit(prompt);
+      setPrompt("");
+      setError("");
+    }
+  };
+  
+  const isValid = prompt.trim() && !checkForForbiddenWord(prompt);
   
   if (isSubmitted) {
     return (
       <div className="bg-green-500/10 backdrop-blur-lg border border-green-400/30 rounded-2xl shadow-xl p-8 mb-6">
         <div className="text-center">
-          <div className="text-5xl mb-4">✅</div>
+          
           <h2 className="text-3xl font-bold text-green-300 mb-3">Prompt envoyé !</h2>
           <p className="text-green-200 text-lg">
             Votre prompt a été envoyé avec succès. L'image est en cours de génération...
@@ -464,30 +501,35 @@ function PromptForm({ onSubmit, isSubmitted }) {
   
   return (
     <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-6 border border-white/20">
-      <h2 className="text-3xl font-bold text-center mb-6 text-white">✨ À votre tour !</h2>
+      <h2 className="text-3xl font-bold text-center mb-6 text-white"> À votre tour !</h2>
       <form
         className="flex flex-col gap-6"
-        onSubmit={e => { 
-          e.preventDefault(); 
-          if (prompt.trim()) {
-            onSubmit(prompt); 
-            setPrompt(""); 
-          }
-        }}
+        onSubmit={handleSubmit}
       >
-        <textarea
-          className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-6 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none resize-none text-lg"
-          rows={5}
-          value={prompt}
-          onChange={e => setPrompt(e.target.value)}
-          placeholder="Décrivez une scène en rapport avec votre mot-clé... Soyez créatif !"
-          required
-        />
+        <div>
+          <textarea
+            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-6 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none resize-none text-lg w-full"
+            rows={5}
+            value={prompt}
+            onChange={handlePromptChange}
+            placeholder={`Décrivez une scène en rapport avec votre mot-clé... Soyez créatif ! (Ne mentionnez pas "${myWord}")`}
+            required
+          />
+          {error && (
+            <div className="mt-2 p-3 bg-red-500/10 border border-red-400/30 rounded-lg">
+              <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          )}
+        </div>
         <button 
-          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-xl py-4 px-8 text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          disabled={!prompt.trim()}
+          className={`backdrop-blur-lg border-2 font-bold rounded-xl py-4 px-8 text-xl transition-all duration-300 shadow-xl transform ${
+            isValid 
+              ? 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white hover:shadow-2xl hover:scale-105' 
+              : 'bg-gray-500/10 border-gray-500/20 text-gray-400 cursor-not-allowed'
+          }`}
+          disabled={!isValid}
         >
-          🎨 Envoyer mon prompt
+          Envoyer mon prompt
         </button>
       </form>
     </div>

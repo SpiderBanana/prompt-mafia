@@ -25,7 +25,7 @@ export default function PlayerOrder({ players, currentPlayerId, eliminatedPlayer
                   : 'bg-gray-200 text-gray-800'
             }`}
           >
-            {p.username} {isEliminated && '💀'}
+            {p.username} {isEliminated}
           </span>
         );
       })}

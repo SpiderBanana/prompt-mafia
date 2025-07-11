@@ -7,7 +7,7 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
       {/* Header */}
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-          🎯 Joueurs
+           Joueurs
         </h2>
         {myWord && (
           <div className="mt-4 p-3 bg-white/20 backdrop-blur rounded-lg border border-white/30">

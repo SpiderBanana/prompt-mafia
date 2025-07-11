@@ -8,7 +8,7 @@ export default function Timer({ duration, onEnd }) {
   }, [time]);
   return (
     <div className="text-xl font-mono text-center">
-      ⏳ {time}s
+      {time}s
     </div>
   );
 }

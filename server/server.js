@@ -90,7 +90,6 @@ io.on("connection", (socket) => {
       playerId: socket.id,
       username: player.username,
       imageUrl: imageUrl
-      // Pas de prompt ici !
     };      io.to(roomId).emit("new_image_broadcast", cardForBroadcast);
 
       const activePlayers = game.players.filter(p => !p.isEliminated);
@@ -116,7 +115,13 @@ io.on("connection", (socket) => {
     const game = games[roomId];
     const voter = game.players.find(p => p.id === socket.id);
     
-    // Vérifier si le joueur votant est éliminé
+    // Vérifier si le joueur existe et s'il est éliminé
+    if (!voter) {
+      console.log(`Joueur non trouvé pour le vote: ${socket.id}`);
+      if (cb) cb({ error: "Joueur non trouvé" });
+      return;
+    }
+    
     if (voter.isEliminated) {
       console.log(`Tentative de vote par un joueur éliminé: ${voter.username}`);
       if (cb) cb({ error: "Vous êtes éliminé et ne pouvez plus voter" });
