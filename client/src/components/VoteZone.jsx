@@ -55,16 +55,6 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
                 </div>
               </div>
               
-              {/* Indicateur de sélection */}
-              {isSelected && (
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg"
-                >
-                  ✓
-                </motion.div>
-              )}
             </motion.label>
           );
         })}
@@ -95,7 +85,6 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
           />
           
           <div className="p-3 text-center">
-            {/* Icône et texte */}
             <div className={`text-lg mb-1 ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
               &gt;&gt;
             </div>
@@ -104,17 +93,6 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
               Passer
             </div>
           </div>
-          
-          {/* Indicateur de sélection */}
-          {selected === "skip" && (
-            <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg"
-            >
-              ✓
-            </motion.div>
-          )}
         </motion.label>
       </div>
       
@@ -144,19 +122,19 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-800 px-6 py-4 rounded-2xl inline-block shadow-lg">
+          <div className="bg-white/10 backdrop-blur-lg border border-green-400/30 text-green-300 px-6 py-4 rounded-2xl inline-block shadow-lg">
             <div className="flex items-center space-x-2">
-              
+             
               <div>
                 <span className="font-bold text-lg">Vote confirmé !</span>
                 {selected && selected !== "skip" && (
-                  <div className="text-sm mt-1">
-                    Vous avez voté pour <span className="font-semibold">{players.find(p => p.id === selected)?.username}</span>
+                  <div className="text-sm mt-1 text-green-200">
+                    Vous avez voté pour <span className="font-semibold text-green-100">{players.find(p => p.id === selected)?.username}</span>
                   </div>
                 )}
                 {selected === "skip" && (
-                  <div className="text-sm mt-1">
-                    Vous avez choisi de <span className="font-semibold">passer le tour</span>
+                  <div className="text-sm mt-1 text-green-200">
+                    Vous avez choisi de <span className="font-semibold text-green-100">passer le tour</span>
                   </div>
                 )}
               </div>

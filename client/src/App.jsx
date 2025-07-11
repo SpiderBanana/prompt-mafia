@@ -101,7 +101,6 @@ export default function App() {
     };
   }, []);  
   const restartGame = () => {
-    // Réinitialiser tous les états du jeu
     setCurrentPlayerId(null);
     setMyWord("");
     setOrder([]);
@@ -119,9 +118,6 @@ export default function App() {
     
 
   };
-
-  // Vérifier si le joueur actuel est éliminé
-  const isCurrentPlayerEliminated = eliminatedPlayers.some(p => p.id === socket.id);
 
   // Écran de connexion
   if (!joined) {
@@ -173,7 +169,7 @@ export default function App() {
           eliminatedPlayers={eliminatedPlayers}
         />
         
-        {/* Zone centrale - Jeu */}
+        {/* Zone de Jeu */}
         <div className="flex-1 flex flex-col">
           {/* Phase d'attente */}
           {phase === "WAITING" && (
@@ -266,7 +262,8 @@ export default function App() {
                 )}
                 
                 {/* Phase de discussion et vote */}
-                {phase === "DISCUSSION" && (                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
+                {phase === "DISCUSSION" && (
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
                     <h2 className="text-3xl font-bold text-center mb-6 text-white">Phase de Discussion</h2>
                     <Timer duration={60} onEnd={() => {
                       // Forcer la fin du vote quand le timer se termine
@@ -317,8 +314,6 @@ export default function App() {
                         })}
                       </div>
                     </div>
-                    
-                    
                   </div>
                 )}
                 
