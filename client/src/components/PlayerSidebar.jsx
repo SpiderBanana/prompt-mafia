@@ -54,7 +54,7 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
                     <p className="text-xs text-yellow-200">En train de jouer...</p>
                   )}
                   {isEliminated && (
-                    <p className="text-xs text-red-400">💀 Éliminé</p>
+                    <p className="text-xs text-red-400">Éliminé</p>
                   )}
                 </div>
                 {isCurrentPlayer && !isEliminated && (

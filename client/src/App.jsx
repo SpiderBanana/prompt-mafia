@@ -266,7 +266,6 @@ export default function App() {
                   <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
                     <h2 className="text-3xl font-bold text-center mb-6 text-white">Phase de Discussion</h2>
                     <Timer duration={60} onEnd={() => {
-                      // Forcer la fin du vote quand le timer se termine
                       socket.emit("force_vote_end", { roomId });
                     }} />
                     <div className="mt-8">
@@ -448,9 +447,9 @@ function PromptForm({ onSubmit, isSubmitted, myWord }) {
     // Vérifier si le mot exact ou ses variantes sont présents
     const wordVariations = [
       cleanWord,
-      cleanWord + 's', // pluriel
-      cleanWord + 'e', // féminin
-      cleanWord + 'es', // féminin pluriel
+      cleanWord + 's', 
+      cleanWord + 'e', 
+      cleanWord + 'es', 
     ];
     
     return wordVariations.some(variation => 
