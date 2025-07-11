@@ -6,7 +6,11 @@ import PlayerSidebar from "./components/PlayerSidebar";
 import Timer from "./components/Timer";
 import VoteZone from "./components/VoteZone";
 
-const socket = io("http://localhost:4000");
+// Configuration dynamique de l'URL du serveur
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 
+  (import.meta.env.DEV ? "http://localhost:4000" : window.location.origin);
+
+const socket = io(SERVER_URL);
 
 export default function App() {
   // États principaux

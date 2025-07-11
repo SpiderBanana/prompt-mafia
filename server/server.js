@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 const { createGame, addPlayerToGame, assignWordsAndRoles, nextTurn, recordPrompt, recordVote, getResults, prepareNewRound, resetGame } = require("./gameLogic");
 const { generateImageWithDelay } = require("./openaiService");
@@ -10,6 +11,15 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
 });
+
+// Servir les fichiers statiques du client (si buildé)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+  });
+}
 
 // Rooms en mémoire
 const games = {};
@@ -327,4 +337,5 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(4000, () => console.log("Serveur lancé sur http://localhost:4000"));
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));
