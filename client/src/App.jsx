@@ -212,7 +212,6 @@ export default function App() {
           {/* Phases de jeu */}
           {phase !== "WAITING" && (
             <div className="flex-1 flex flex-col">
-              {/* Header de jeu */}
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
                 <h1 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                    Prompt Mafia
@@ -247,6 +246,7 @@ export default function App() {
                   currentUserId={socket.id}
                   players={players}
                   currentPlayerId={currentPlayerId}
+                  eliminatedPlayers={eliminatedPlayers}
                 />
                 
                 {/* Formulaire de prompt */}
@@ -319,7 +319,7 @@ export default function App() {
                 {/* Résultats de round */}
                 {phase === "ROUND_RESULT" && roundResult && (
                   <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 text-center border border-white/20">
-                    <h2 className="text-3xl font-bold mb-4 text-white">📊 Résultat du Round {round - 1}</h2>
+                    <h2 className="text-3xl font-bold mb-4 text-white">Résultat du Round {round - 1}</h2>
                     <p className="text-xl mb-4 text-gray-200">{roundResult.message}</p>
                     
                     {roundResult.eliminatedPlayer && (

@@ -1,10 +1,13 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-export default function CardGallery({ cards, votes, currentUserId, players = [], currentPlayerId }) {
+export default function CardGallery({ cards, votes, currentUserId, players = [], currentPlayerId, eliminatedPlayers = [] }) {
   // Créer des cartes fantômes pour les joueurs qui n'ont pas encore généré d'image
   const ghostCards = players
-    .filter(player => !cards.some(card => card.playerId === player.id))
+    .filter(player => 
+      !cards.some(card => card.playerId === player.id) && 
+      !eliminatedPlayers.some(p => p.id === player.id)
+    )
     .map(player => ({
       playerId: player.id,
       username: player.username,
@@ -14,13 +17,30 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
 
   const allCards = [...cards, ...ghostCards];
 
+  // Fonction pour vérifier si une image est une image de backup
+  const isBackupImage = (imageUrl) => {
+    return imageUrl && imageUrl.includes('picsum.photos');
+  };
+
+  // Fonction pour vérifier si un joueur est éliminé
+  const isPlayerEliminated = (playerId) => {
+    return eliminatedPlayers.some(p => p.id === playerId);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 p-6">
-      {allCards.map((card, idx) => (
+      {allCards.map((card, idx) => {
+        const isEliminated = isPlayerEliminated(card.playerId);
+        
+        return (
         <motion.div
           key={card.playerId}
           className={`
-            relative bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden
+            relative backdrop-blur-lg rounded-2xl shadow-2xl border overflow-hidden
+            ${isEliminated 
+              ? 'bg-red-900/50 border-red-500/50 opacity-60' 
+              : 'bg-white/10 border-white/20'
+            }
             ${card.isCurrentPlayer && card.isGhost ? 'ring-2 ring-yellow-400 ring-opacity-75' : ''}
           `}
           initial={{ scale: 0.8, opacity: 0, y: 50 }}
@@ -35,7 +55,16 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
         >
           {/* Image ou zone de chargement */}
           <div className="aspect-square relative">
-            {card.isGhost ? (
+            {isEliminated ? (
+              <div className="w-full h-full bg-gradient-to-br from-gray-900/50 to-gray-800/50 flex flex-col items-center justify-center">
+                <div className="text-center">
+                  <div className="text-gray-400 text-2xl font-bold mb-2">💀</div>
+                  <p className="text-gray-300 text-lg font-bold">
+                    JOUEUR ÉLIMINÉ
+                  </p>
+                </div>
+              </div>
+            ) : card.isGhost ? (
               // Carte fantôme avec animation de chargement
               <div className="w-full h-full bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex flex-col items-center justify-center">
                 {card.isCurrentPlayer ? (
@@ -53,6 +82,19 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
                   </>
                 )}
               </div>
+            ) : isBackupImage(card.imageUrl) ? (
+              // Image censurée (fallback)
+              <div className="w-full h-full bg-gradient-to-br from-red-900/30 to-red-800/30 flex flex-col items-center justify-center relative">
+                <div className="relative z-10 text-center">
+                  <div className="text-red-400 text-2xl font-bold mb-2">⚠️</div>
+                  <p className="text-red-300 text-lg font-bold">
+                    CENSURÉ
+                  </p>
+                  <p className="text-red-200 text-xs mt-1">
+                    Contenu non généré
+                  </p>
+                </div>
+              </div>
             ) : (
               // Image réelle
               <img
@@ -69,16 +111,25 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
                 <div className="flex items-center space-x-2">
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                    ${card.playerId === currentUserId 
+                    ${isEliminated
+                      ? 'bg-red-500 text-white'
+                      : card.playerId === currentUserId 
                       ? 'bg-emerald-500 text-white' 
                       : 'bg-slate-600 text-gray-200'
                     }
                   `}>
                     {card.username.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-white font-semibold text-sm">
-                    {card.username}
-                  </span>
+                  <div>
+                    <span className={`font-semibold text-sm ${
+                      isEliminated ? 'text-red-300 line-through' : 'text-white'
+                    }`}>
+                      {card.username}
+                    </span>
+                    {isEliminated && (
+                      <p className="text-xs text-red-400">Éliminé</p>
+                    )}
+                  </div>
                 </div>
                 
                 {card.isCurrentPlayer && card.isGhost && (
@@ -98,7 +149,8 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent animate-shimmer"></div>
           )}
         </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 }
