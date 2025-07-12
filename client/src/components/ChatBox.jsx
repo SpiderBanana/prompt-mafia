@@ -1,16 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function ChatBox({ messages, onSend }) {
   const [input, setInput] = useState("");
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-2 max-h-96 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
+      >
         {messages.map((msg, i) => (
-          <div key={i} className="text-white">
-            <span className="font-bold text-white">{msg.username}:</span>{" "}
-            <span className="text-white">{msg.message}</span>
+          <div key={i} className="text-white break-words">
+            <span className="font-bold text-blue-300">{msg.username}:</span>{" "}
+            <span className="text-gray-200">{msg.message}</span>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <form
         onSubmit={e => {

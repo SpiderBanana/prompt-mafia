@@ -17,6 +17,8 @@ export default function App() {
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
   const [joined, setJoined] = useState(false);
+  const [isHost, setIsHost] = useState(false);
+  const [connectionError, setConnectionError] = useState("");
 
   const [players, setPlayers] = useState([]);
   const [currentPlayerId, setCurrentPlayerId] = useState(null);
@@ -37,7 +39,14 @@ export default function App() {
 
   // Handlers Socket.IO
   useEffect(() => {
-    socket.on("update_players", setPlayers);
+    socket.on("update_players", (updatedPlayers) => {
+      setPlayers(updatedPlayers);
+      // Vérifier si le joueur actuel est l'hôte
+      const currentPlayer = updatedPlayers.find(p => p.id === socket.id);
+      if (currentPlayer) {
+        setIsHost(currentPlayer.isHost || false);
+      }
+    });
     socket.on("assign_roles", (roles) => {
       const me = roles.find(r => r.id === socket.id);
       if (me) {
@@ -115,8 +124,7 @@ export default function App() {
     setRound(1);
     setRoundResult(null);
     setRevealedCards([]);
-    
-
+    // Ne pas réinitialiser isHost car l'hôte reste le même
   };
 
   // Écran de connexion
@@ -127,8 +135,14 @@ export default function App() {
           onSubmit={e => {
             e.preventDefault();
             if (roomId && username) {
-              socket.emit("join_room", { roomId, username }, (player) => {
-                if (player) setJoined(true);
+              setConnectionError("");
+              socket.emit("join_room", { roomId, username }, (response) => {
+                if (response.error) {
+                  setConnectionError(response.error);
+                } else {
+                  setJoined(true);
+                  setIsHost(response.isHost || false);
+                }
               });
             }
           }}
@@ -137,6 +151,13 @@ export default function App() {
           <h1 className="text-5xl font-bold text-center mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
              Prompt Mafia
           </h1>
+          
+          {connectionError && (
+            <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-4 mb-4">
+              <p className="text-red-300 text-center">{connectionError}</p>
+            </div>
+          )}
+          
           <input 
             className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
             value={roomId} 
@@ -179,26 +200,40 @@ export default function App() {
                    Prompt Mafia
                 </h1>
                 <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-6 text-white">
+                  <h2 className="text-2xl font-semibold mb-2 text-white">
                     Joueurs connectés ({players.length})
                   </h2>
+                  <p className="text-sm text-gray-300 mb-6">
+                    {isHost ? "Vous êtes l'hôte de cette room" : "En attente de l'hôte..."}
+                  </p>
                   <div className="flex flex-wrap gap-3 justify-center mb-8">
                     {players.map((player) => (
                       <span 
                         key={player.id} 
-                        className="bg-blue-500/20 backdrop-blur text-blue-200 px-6 py-3 rounded-full font-medium border border-blue-400/30"
+                        className={`backdrop-blur px-6 py-3 rounded-full font-medium border ${
+                          player.isHost 
+                            ? 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30' 
+                            : 'bg-blue-500/20 text-blue-200 border-blue-400/30'
+                        }`}
                       >
                         {player.username}
+                        {player.isHost && ' (hôte)'}
                       </span>
                     ))}
                   </div>
                   {players.length >= 3 ? (
-                    <button
-                      onClick={() => socket.emit("start_game", { roomId })}
-                      className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-4 px-12 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
-                    >
-                      Démarrer la partie
-                    </button>
+                    isHost ? (
+                      <button
+                        onClick={() => socket.emit("start_game", { roomId })}
+                        className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-4 px-12 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                      >
+                        Démarrer la partie
+                      </button>
+                    ) : (
+                      <p className="text-gray-300 text-xl">
+                        Attendez que l'hôte démarre la partie...
+                      </p>
+                    )
                   ) : (
                     <p className="text-gray-300 text-xl">
                       Attendez au moins 3 joueurs pour commencer... ({players.length}/3)

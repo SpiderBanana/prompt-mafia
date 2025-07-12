@@ -3,7 +3,6 @@
 export default function PlayerSidebar({ players, currentPlayerId, myWord, eliminatedPlayers = [] }) {
   return (
     <div className="w-80 bg-white/10 backdrop-blur-lg text-white rounded-2xl shadow-2xl p-6 h-fit border border-white/20">
-      {/* Header */}
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
            Joueurs

@@ -10,7 +10,8 @@ function createGame(roomId) {
     currentTurn: 0,
     status: "WAITING",
     round: 1,
-    eliminatedPlayers: []
+    eliminatedPlayers: [],
+    hostId: null
   };
 }
 
@@ -22,7 +23,8 @@ function addPlayerToGame(game, id, username) {
     isEliminated: false,
     hasSubmittedPrompt: false,
     hasVoted: false,
-    vote: null
+    vote: null,
+    isHost: false
   };
   game.players.push(player);
   return player;

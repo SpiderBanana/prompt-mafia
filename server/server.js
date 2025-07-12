@@ -28,16 +28,44 @@ io.on("connection", (socket) => {
   socket.on("join_room", ({ roomId, username }, cb) => {
     if (!games[roomId]) {
       games[roomId] = createGame(roomId);
+      console.log(`Nouvelle room créée: ${roomId}`);
     }
+    
+    if (games[roomId].status !== "WAITING") {
+      cb({ error: "Une partie est déjà en cours dans cette room" });
+      return;
+    }
+    
+    console.log(`${username} rejoint la room ${roomId}. Joueurs actuels: ${games[roomId].players.length}`);
+    
     const player = addPlayerToGame(games[roomId], socket.id, username);
+    
+    if (games[roomId].players.length === 1) {
+      games[roomId].hostId = socket.id;
+      player.isHost = true;
+      console.log(`${username} est devenu l'hôte de la room ${roomId}`);
+    }
+    
     socket.join(roomId);
+    console.log(`Émission update_players pour la room ${roomId}:`, games[roomId].players.map(p => ({name: p.username, isHost: p.isHost})));
     io.to(roomId).emit("update_players", games[roomId].players);
     cb(player);
   });
 
   socket.on("start_game", ({ roomId }, cb) => {
-    if (games[roomId].status !== "WAITING") {
-      resetGame(games[roomId]);
+    const game = games[roomId];
+    if (!game) {
+      cb({ error: "Room non trouvée" });
+      return;
+    }
+    
+    if (game.hostId !== socket.id) {
+      cb({ error: "Seul l'hôte peut démarrer la partie" });
+      return;
+    }
+    
+    if (game.status !== "WAITING") {
+      resetGame(game);
     }
     
     assignWordsAndRoles(games[roomId]);
@@ -218,8 +246,33 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    console.log("Déconnexion:", socket.id);
+    
     Object.values(games).forEach(game => {
-      game.players = game.players.filter(p => p.id != socket.id);
+      const wasHost = game.hostId === socket.id;
+      
+      game.players = game.players.filter(p => p.id !== socket.id);
+      
+      // Si l'hôte se déconnecte et qu'il reste des joueurs, transférer le statut d'hôte
+      if (wasHost && game.players.length > 0) {
+        const newHost = game.players[0];
+        game.hostId = newHost.id;
+        newHost.isHost = true;
+        console.log(`Nouveau hôte pour la room ${game.roomId}: ${newHost.username}`);
+        
+        // Notifier tous les joueurs du changement d'hôte
+        io.to(game.roomId).emit("update_players", game.players);
+      } else if (game.players.length === 0) {
+        // Si plus de joueurs, supprimer la room après un délai
+        setTimeout(() => {
+          if (games[game.roomId] && games[game.roomId].players.length === 0) {
+            delete games[game.roomId];
+            console.log(`Room ${game.roomId} supprimée (vide)`);
+          }
+        }, 30000); 
+      } else {
+        io.to(game.roomId).emit("update_players", game.players);
+      }
     });
   });
 });
