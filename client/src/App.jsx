@@ -183,7 +183,7 @@ export default function App() {
   // Interface principale du jeu
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
-      <div className="container mx-auto p-4 min-h-screen flex gap-6 pr-96">
+      <div className="container mx-auto p-4 min-h-screen flex gap-6">
         <PlayerSidebar 
           players={players}
           currentPlayerId={currentPlayerId}
@@ -451,9 +451,9 @@ export default function App() {
         </div>
         
         {/* Sidebar droite - Chat */}
-        <div className="w-80 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col fixed right-4 top-4 h-[75vh]">
+        <div className="w-80 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col h-[calc(100vh-2rem)]">
           <h3 className="font-bold text-2xl mb-4 text-center text-purple-300">Chat</h3>
-          <div className="flex-1">
+          <div className="flex-1 min-h-0">
             <ChatBox 
               messages={chat} 
               onSend={msg => socket.emit("chat_message", { roomId, username, message: msg })} 
