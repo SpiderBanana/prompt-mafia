@@ -1,4 +1,4 @@
-# Prompt Mafia - Règles du Jeu
+# Prompt Mafia (Subterfuge(nouveau nom ^^)) - Règles du Jeu
 
 ## Objectif du Jeu
 

@@ -148,8 +148,8 @@ export default function App() {
           }}
           className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col gap-6 w-[500px] p-16 border border-white/20"
         >
-          <h1 className="text-5xl font-bold text-center mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-             Prompt Mafia
+          <h1 className="text-5xl font-bold text-center mb-8 text-purple-400">
+            Subterfuge
           </h1>
           
           {connectionError && (
@@ -195,9 +195,8 @@ export default function App() {
           {/* Phase d'attente */}
           {phase === "WAITING" && (
             <div className="flex-1 flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-12 text-center border border-white/20">
-                <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                   Prompt Mafia
+              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-12 text-center border border-white/20">                <h1 className="text-5xl font-bold mb-8 text-purple-400">
+                  Subterfuge
                 </h1>
                 <div className="mb-8">
                   <h2 className="text-2xl font-semibold mb-2 text-white">
@@ -247,9 +246,8 @@ export default function App() {
           {/* Phases de jeu */}
           {phase !== "WAITING" && (
             <div className="flex-1 flex flex-col">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
-                <h1 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                   Prompt Mafia
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">                <h1 className="text-3xl font-bold text-center mb-4 text-purple-400">
+                  Subterfuge
                 </h1>
                 
                 {/* Notification du tour actuel */}
