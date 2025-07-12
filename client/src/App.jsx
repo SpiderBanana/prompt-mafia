@@ -71,7 +71,7 @@ export default function App() {
       setPhase("RESULT");
     });
     
-    // Nouveaux gestionnaires pour le système multi-round
+   
     socket.on("round_result", (res) => {
       setRoundResult(res);
       setRevealedCards(res.revealedCards || []);
@@ -124,7 +124,6 @@ export default function App() {
     setRound(1);
     setRoundResult(null);
     setRevealedCards([]);
-    // Ne pas réinitialiser isHost car l'hôte reste le même
   };
 
   // Écran de connexion
@@ -157,21 +156,23 @@ export default function App() {
               <p className="text-red-300 text-center">{connectionError}</p>
             </div>
           )}
+
+          <input 
+            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
+            value={username} 
+            onChange={e => setUsername(e.target.value)} 
+            placeholder="Votre pseudo" 
+            required
+          />
           
           <input 
             className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
             value={roomId} 
             onChange={e => setRoomId(e.target.value)} 
-            placeholder="Nom de la room..." 
+            placeholder="Nom de la room" 
             required
           />
-          <input 
-            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
-            value={username} 
-            onChange={e => setUsername(e.target.value)} 
-            placeholder="Votre pseudo..." 
-            required
-          />
+          
           <button className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold rounded-xl py-4 px-8 text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
             Rejoindre la partie
           </button>
@@ -450,8 +451,8 @@ export default function App() {
         </div>
         
         {/* Sidebar droite - Chat */}
-        <div className="w-80 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col fixed right-4 top-4 h-[80vh]">
-          <h3 className="font-bold text-2xl mb-4 text-center text-white">Chat</h3>
+        <div className="w-80 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col fixed right-4 top-4 h-[75vh]">
+          <h3 className="font-bold text-2xl mb-4 text-center text-purple-300">Chat</h3>
           <div className="flex-1">
             <ChatBox 
               messages={chat} 
