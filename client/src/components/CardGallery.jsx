@@ -85,7 +85,6 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
               // Image censurée (fallback)
               <div className="w-full h-full bg-gradient-to-br from-red-900/30 to-red-800/30 flex flex-col items-center justify-center relative">
                 <div className="relative z-10 text-center">
-                  <div className="text-red-400 text-2xl font-bold mb-2">⚠️</div>
                   <p className="text-red-300 text-lg font-bold">
                     CENSURÉ
                   </p>

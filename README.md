@@ -1,4 +1,24 @@
-# Prompt Mafia (Subterfuge(nouveau nom ^^)) - Règles du Jeu
+# Prompt Mafia (Subterfuge(nouveau nom ^^)) 
+
+## Installation et Lancement
+
+### Prérequis
+- Node.js installé sur votre machine
+
+### Installation
+```bash
+# Dans le dossier /server
+cd server
+npm i
+npm run start
+
+# Dans le dossier /client (dans un autre terminal)
+cd client
+npm i
+npm run dev
+```
+
+# Règles du Jeu
 
 ## Objectif du Jeu
 
