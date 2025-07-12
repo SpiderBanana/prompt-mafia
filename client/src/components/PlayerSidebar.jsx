@@ -2,10 +2,10 @@
 
 export default function PlayerSidebar({ players, currentPlayerId, myWord, eliminatedPlayers = [] }) {
   return (
-    <div className="w-80 bg-white/10 backdrop-blur-lg text-white rounded-2xl shadow-2xl p-6 h-fit border border-white/20">
+    <div className="h-full flex flex-col text-white">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-           Joueurs
+        <h2 className="text-2xl font-bold text-purple-400">
+          Joueurs
         </h2>
         {myWord && (
           <div className="mt-4 p-3 bg-white/20 backdrop-blur rounded-lg border border-white/30">
@@ -16,7 +16,7 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
       </div>
 
       {/* Liste des joueurs */}
-      <div className="space-y-3">
+      <div className="space-y-3 flex-1 overflow-y-auto">
         {players.map((player, index) => {
           const isCurrentPlayer = player.id === currentPlayerId;
           const isEliminated = eliminatedPlayers.some(p => p.id === player.id);

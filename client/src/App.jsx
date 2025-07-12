@@ -183,16 +183,19 @@ export default function App() {
   // Interface principale du jeu
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
-      <div className="container mx-auto p-4 min-h-screen flex gap-6">
-        <PlayerSidebar 
-          players={players}
-          currentPlayerId={currentPlayerId}
-          myWord={myWord}
-          eliminatedPlayers={eliminatedPlayers}
-        />
+      <div className="min-h-screen flex">
+        {/* Sidebar gauche - Joueurs */}
+        <div className="w-72 fixed left-4 top-6 bottom-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20">
+          <PlayerSidebar 
+            players={players}
+            currentPlayerId={currentPlayerId}
+            myWord={myWord}
+            eliminatedPlayers={eliminatedPlayers}
+          />
+        </div>
         
-        {/* Zone de Jeu */}
-        <div className="flex-1 flex flex-col">
+        {/* Zone de Jeu - Centre */}
+        <div className="flex-1 flex flex-col p-6 ml-80 mr-80">
           {/* Phase d'attente */}
           {phase === "WAITING" && (
             <div className="flex-1 flex items-center justify-center">
@@ -451,9 +454,9 @@ export default function App() {
         </div>
         
         {/* Sidebar droite - Chat */}
-        <div className="w-80 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col h-[calc(100vh-2rem)]">
+        <div className="w-72 fixed right-4 top-6 bottom-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col">
           <h3 className="font-bold text-2xl mb-4 text-center text-purple-300">Chat</h3>
-          <div className="flex-1 min-h-0">
+          <div className="flex-1">
             <ChatBox 
               messages={chat} 
               onSend={msg => socket.emit("chat_message", { roomId, username, message: msg })} 
