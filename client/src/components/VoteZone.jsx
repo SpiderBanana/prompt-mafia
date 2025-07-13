@@ -1,16 +1,39 @@
 import { motion } from "framer-motion";
 
-export default function VoteZone({ players, votes = [], onVote, selected, disabled, onConfirm, hasConfirmed }) {
+export default function VoteZone({ players, votes = [], onVote, selected, disabled, onConfirm, hasConfirmed, cards = [], eliminatedPlayers = [] }) {
   // Compter les votes pour chaque joueur
   const getVoteCount = (playerId) => {
     return votes.filter(vote => vote.votedPlayerId === playerId).length;
   };
 
+  const createOrderedPlayers = () => {
+    const ghostCards = players
+      .filter(player => 
+        !cards.some(card => card.playerId === player.id) && 
+        !eliminatedPlayers.some(p => p.id === player.id)
+      )
+      .map(player => ({
+        playerId: player.id,
+        username: player.username,
+        isGhost: true
+      }));
+
+    const allCards = [...cards, ...ghostCards];
+    
+  
+    return allCards
+      .filter(card => !eliminatedPlayers.some(p => p.id === card.playerId))
+      .map(card => players.find(p => p.id === card.playerId))
+      .filter(Boolean); 
+  };
+
+  const orderedPlayers = createOrderedPlayers();
+
   return (
     <div className="space-y-6">
       {/* Zone de sélection des joueurs */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {players.map((p, index) => {
+        {orderedPlayers.map((p, index) => {
           const voteCount = getVoteCount(p.id);
           const isSelected = selected === p.id;
           
@@ -63,7 +86,7 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
         <motion.label
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: players.length * 0.1 }}
+          transition={{ delay: orderedPlayers.length * 0.1 }}
           className={`cursor-pointer group relative overflow-hidden rounded-xl border transition-all duration-300 ${
             selected === "skip" 
               ? "border-blue-400/60 bg-blue-500/20 backdrop-blur-lg shadow-lg shadow-blue-500/25" 
@@ -84,12 +107,8 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
             className="sr-only"
           />
           
-          <div className="p-3 text-center">
-            <div className={`text-lg mb-1 ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
-              &gt;&gt;
-            </div>
-            
-            <div className={`font-medium text-xs ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
+          <div className="p-3 text-center flex items-center justify-center h-full">
+            <div className={`font-medium text-sm ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
               Passer
             </div>
           </div>
@@ -129,7 +148,7 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
                 <span className="font-bold text-lg">Vote confirmé !</span>
                 {selected && selected !== "skip" && (
                   <div className="text-sm mt-1 text-green-200">
-                    Vous avez voté pour <span className="font-semibold text-green-100">{players.find(p => p.id === selected)?.username}</span>
+                    Vous avez voté pour <span className="font-semibold text-green-100">{orderedPlayers.find(p => p.id === selected)?.username}</span>
                   </div>
                 )}
                 {selected === "skip" && (
