@@ -299,25 +299,38 @@ export default function App() {
               
               {/* Contenu principal scrollable */}
               <div className="flex-1 overflow-y-auto">
-                <CardGallery 
-                  cards={cards} 
-                  votes={votes} 
-                  currentUserId={socket.id}
-                  players={players}
-                  currentPlayerId={currentPlayerId}
-                  eliminatedPlayers={eliminatedPlayers}
-                />
-                
-                {/* Formulaire de prompt */}
-                {phase === "PROMPT" && currentPlayerId === socket.id && (
+                {phase === "PROMPT" && currentPlayerId === socket.id && !isPromptSubmitted ? (
                   <PromptForm 
                     onSubmit={prompt => {
                       socket.emit("submit_prompt", { roomId, prompt });
                       setIsPromptSubmitted(true);
                     }}
-                    isSubmitted={isPromptSubmitted}
+                    isSubmitted={false}
                     myWord={myWord}
                   />
+                ) : (
+                  <>
+                    <CardGallery 
+                      cards={cards} 
+                      votes={votes} 
+                      currentUserId={socket.id}
+                      players={players}
+                      currentPlayerId={currentPlayerId}
+                      eliminatedPlayers={eliminatedPlayers}
+                    />
+                    
+                   
+                    {phase === "PROMPT" && currentPlayerId === socket.id && isPromptSubmitted && (
+                      <div className="bg-green-500/10 backdrop-blur-lg border border-green-400/30 rounded-2xl shadow-xl p-8 mb-6">
+                        <div className="text-center">
+                          <h2 className="text-3xl font-bold text-green-300 mb-4">Prompt envoyé !</h2>
+                          <p className="text-green-200 text-lg">
+                            Votre prompt a été envoyé avec succès. L'image est en cours de génération...
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
                 
                 {/* Phase de discussion et vote */}
@@ -493,7 +506,7 @@ export default function App() {
 }
 
 // Composant formulaire de prompt
-function PromptForm({ onSubmit, isSubmitted, myWord }) {
+function PromptForm({ onSubmit, myWord }) {
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState("");
   
@@ -541,22 +554,9 @@ function PromptForm({ onSubmit, isSubmitted, myWord }) {
   
   const isValid = prompt.trim() && !checkForForbiddenWord(prompt);
   
-  if (isSubmitted) {
-    return (
-      <div className="bg-green-500/10 backdrop-blur-lg border border-green-400/30 rounded-2xl shadow-xl p-8 mb-6">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-green-300 mb-4">Prompt envoyé !</h2>
-          <p className="text-green-200 text-lg">
-            Votre prompt a été envoyé avec succès. L'image est en cours de génération...
-          </p>
-        </div>
-      </div>
-    );
-  }
-  
   return (
     <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-6 border border-white/20">
-      <h2 className="text-3xl font-bold text-center mb-6 text-white"> À votre tour !</h2>
+      <h2 className="text-3xl font-bold text-center mb-6 text-white">À votre tour !</h2>
       <form
         className="flex flex-col gap-6"
         onSubmit={handleSubmit}

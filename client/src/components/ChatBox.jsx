@@ -100,38 +100,40 @@ export default function ChatBox({ messages, onSend }) {
         }}
         className="mt-4"
       >
-        <div className="relative flex gap-2">
-          <input
-            className="flex-1 border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-3 pr-16 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none"
-            value={input}
-            onChange={e => {
-              if (e.target.value.length <= MAX_CHARS) {
-                setInput(e.target.value);
-              }
-            }}
-            placeholder="Tapez votre message..."
-            maxLength={MAX_CHARS}
-          />
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <input
+              className="w-full border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-3 pr-16 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none"
+              value={input}
+              onChange={e => {
+                if (e.target.value.length <= MAX_CHARS) {
+                  setInput(e.target.value);
+                }
+              }}
+              placeholder="Tapez votre message..."
+              maxLength={MAX_CHARS}
+            />
+            <div className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-medium pointer-events-none ${
+              input.length > MAX_CHARS * 0.9 
+                ? input.length === MAX_CHARS 
+                  ? 'text-red-400' 
+                  : 'text-yellow-400'
+                : 'text-gray-400'
+            }`}>
+              {input.length}/{MAX_CHARS}
+            </div>
+          </div>
           <button
             type="button"
             onClick={() => setShowGifPicker(true)}
-            className="px-4 py-3 bg-purple-600/20 hover:bg-purple-600/40 border-2 border-purple-400/30 hover:border-purple-400/60 text-purple-300 rounded-xl transition-all duration-200 flex items-center justify-center"
+            className="px-3 py-3 bg-purple-600/20 hover:bg-purple-600/40 border-2 border-purple-400/30 hover:border-purple-400/60 text-purple-300 rounded-xl transition-all duration-200 flex items-center justify-center shrink-0"
             title="Ajouter un GIF"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span className="ml-1 text-xs font-medium">GIF</span>
+            <span className="ml-1 text-xs font-medium hidden sm:inline">GIF</span>
           </button>
-          <div className={`absolute right-20 top-1/2 transform -translate-y-1/2 text-xs font-medium ${
-            input.length > MAX_CHARS * 0.9 
-              ? input.length === MAX_CHARS 
-                ? 'text-red-400' 
-                : 'text-yellow-400'
-              : 'text-gray-400'
-          }`}>
-            {input.length}/{MAX_CHARS}
-          </div>
         </div>
       </form>
 
