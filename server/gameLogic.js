@@ -11,23 +11,56 @@ function createGame(roomId) {
     status: "WAITING",
     round: 1,
     eliminatedPlayers: [],
-    hostId: null
+    hostId: null,
+    allPlayersEverJoined: [] 
   };
 }
 
 function addPlayerToGame(game, id, username) {
-  const player = {
-    id, username,
-    word: null,
-    isIntruder: false,
-    isEliminated: false,
-    hasSubmittedPrompt: false,
-    hasVoted: false,
-    vote: null,
-    isHost: false
-  };
-  game.players.push(player);
-  return player;
+  const existingPlayerRecord = game.allPlayersEverJoined.find(p => p.username === username);
+  
+  if (existingPlayerRecord) {
+    const player = {
+      id, 
+      username,
+      word: existingPlayerRecord.word,
+      isIntruder: existingPlayerRecord.isIntruder,
+      isEliminated: existingPlayerRecord.isEliminated,
+      hasSubmittedPrompt: false, // Reset pour le round actuel
+      hasVoted: false, // Reset pour le round actuel
+      vote: null,
+      isHost: existingPlayerRecord.isHost,
+      isReturning: true // Marquer comme joueur qui revient
+    };
+    game.players.push(player);
+    return player;
+  } else {
+    // Nouveau joueur
+    const player = {
+      id, 
+      username,
+      word: null,
+      isIntruder: false,
+      isEliminated: false,
+      hasSubmittedPrompt: false,
+      hasVoted: false,
+      vote: null,
+      isHost: false,
+      isReturning: false
+    };
+    game.players.push(player);
+    
+    // Ajouter à la liste de tous les joueurs ayant rejoint
+    game.allPlayersEverJoined.push({
+      username,
+      word: null,
+      isIntruder: false,
+      isEliminated: false,
+      isHost: false
+    });
+    
+    return player;
+  }
 }
 
 function assignWordsAndRoles(game) {
@@ -42,6 +75,18 @@ function assignWordsAndRoles(game) {
     p.hasVoted = false;
     p.vote = null;
   });
+  
+  // Mettre à jour le registre de tous les joueurs
+  game.players.forEach(player => {
+    const record = game.allPlayersEverJoined.find(p => p.username === player.username);
+    if (record) {
+      record.word = player.word;
+      record.isIntruder = player.isIntruder;
+      record.isEliminated = player.isEliminated;
+      record.isHost = player.isHost;
+    }
+  });
+  
   game.turnOrder = shuffle(game.players.map(p => p.id));
   game.currentTurn = 0;
 }
@@ -218,7 +263,35 @@ function resetGame(game) {
     player.hasSubmitted = false;
   });
   
+  // Réinitialiser aussi le registre des joueurs
+  game.allPlayersEverJoined.forEach(player => {
+    player.word = null;
+    player.isIntruder = false;
+    player.isEliminated = false;
+  });
+  
   return game;
+}
+
+function canPlayerRejoinGame(game, username) {
+  // Vérifier si le joueur a déjà participé à cette room
+  const playerRecord = game.allPlayersEverJoined.find(p => p.username === username);
+  return playerRecord !== undefined;
+}
+
+function updatePlayerDisconnection(game, playerId) {
+  // Marquer la déconnexion mais garder le record du joueur
+  const player = game.players.find(p => p.id === playerId);
+  if (player) {
+    const record = game.allPlayersEverJoined.find(p => p.username === player.username);
+    if (record) {
+      // Mettre à jour le record avec l'état actuel du joueur
+      record.word = player.word;
+      record.isIntruder = player.isIntruder;
+      record.isEliminated = player.isEliminated;
+      record.isHost = player.isHost;
+    }
+  }
 }
 
 function shuffle(arr) {
@@ -237,5 +310,7 @@ module.exports = {
   recordVote,
   getResults,
   prepareNewRound,
-  resetGame
+  resetGame,
+  canPlayerRejoinGame,
+  updatePlayerDisconnection
 };

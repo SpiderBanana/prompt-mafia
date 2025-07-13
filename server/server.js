@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
-const { createGame, addPlayerToGame, assignWordsAndRoles, nextTurn, recordPrompt, recordVote, getResults, prepareNewRound, resetGame } = require("./gameLogic");
+const { createGame, addPlayerToGame, assignWordsAndRoles, nextTurn, recordPrompt, recordVote, getResults, prepareNewRound, resetGame, canPlayerRejoinGame, updatePlayerDisconnection } = require("./gameLogic");
 const { generateImageWithDelay } = require("./openaiService");
 require('dotenv').config();
 
@@ -31,22 +31,46 @@ io.on("connection", (socket) => {
       console.log(`Nouvelle room créée: ${roomId}`);
     }
     
-    if (games[roomId].status !== "WAITING") {
-      cb({ error: "Une partie est déjà en cours dans cette room" });
+    const canRejoin = canPlayerRejoinGame(games[roomId], username);
+    
+    if (games[roomId].status !== "WAITING" && !canRejoin) {
+      cb({ error: "Une partie est déjà en cours dans cette room et vous n'avez pas encore participé" });
       return;
     }
     
-    console.log(`${username} rejoint la room ${roomId}. Joueurs actuels: ${games[roomId].players.length}`);
+    // Vérifier si le joueur est déjà connecté
+    const existingPlayer = games[roomId].players.find(p => p.username === username);
+    if (existingPlayer) {
+      cb({ error: "Un joueur avec ce pseudo est déjà connecté" });
+      return;
+    }
+    
+    console.log(`${username} ${canRejoin ? 'revient dans' : 'rejoint'} la room ${roomId}. Joueurs actuels: ${games[roomId].players.length}`);
     
     const player = addPlayerToGame(games[roomId], socket.id, username);
     
-    if (games[roomId].players.length === 1) {
+    // Gestion de l'hôte
+    if (games[roomId].players.length === 1 && !games[roomId].hostId) {
       games[roomId].hostId = socket.id;
       player.isHost = true;
       console.log(`${username} est devenu l'hôte de la room ${roomId}`);
     }
     
     socket.join(roomId);
+    
+    if (canRejoin && games[roomId].status !== "WAITING") {
+      socket.emit("assign_roles", [{ id: player.id, word: player.word }]);
+      socket.emit("rejoin_game", {
+        status: games[roomId].status,
+        round: games[roomId].round,
+        eliminatedPlayers: games[roomId].eliminatedPlayers,
+        cards: games[roomId].cards,
+        votes: games[roomId].votes,
+        turnOrder: games[roomId].turnOrder,
+        currentTurn: games[roomId].currentTurn
+      });
+    }
+    
     console.log(`Émission update_players pour la room ${roomId}:`, games[roomId].players.map(p => ({name: p.username, isHost: p.isHost})));
     io.to(roomId).emit("update_players", games[roomId].players);
     cb(player);
@@ -249,7 +273,13 @@ io.on("connection", (socket) => {
     console.log("Déconnexion:", socket.id);
     
     Object.values(games).forEach(game => {
+      const player = game.players.find(p => p.id === socket.id);
       const wasHost = game.hostId === socket.id;
+      
+      if (player) {
+        updatePlayerDisconnection(game, socket.id);
+        console.log(`${player.username} s'est déconnecté de la room ${game.roomId}`);
+      }
       
       game.players = game.players.filter(p => p.id !== socket.id);
       
@@ -258,18 +288,24 @@ io.on("connection", (socket) => {
         const newHost = game.players[0];
         game.hostId = newHost.id;
         newHost.isHost = true;
+        
+        const hostRecord = game.allPlayersEverJoined.find(p => p.username === newHost.username);
+        if (hostRecord) {
+          hostRecord.isHost = true;
+        }
+        
         console.log(`Nouveau hôte pour la room ${game.roomId}: ${newHost.username}`);
         
         // Notifier tous les joueurs du changement d'hôte
         io.to(game.roomId).emit("update_players", game.players);
       } else if (game.players.length === 0) {
-        // Si plus de joueurs, supprimer la room après un délai
+        // Si plus de joueurs connectés, garder la room pendant 5 minutes
         setTimeout(() => {
           if (games[game.roomId] && games[game.roomId].players.length === 0) {
             delete games[game.roomId];
-            console.log(`Room ${game.roomId} supprimée (vide)`);
+            console.log(`Room ${game.roomId} supprimée (vide pendant 5 minutes)`);
           }
-        }, 30000); 
+        }, 300000);
       } else {
         io.to(game.roomId).emit("update_players", game.players);
       }

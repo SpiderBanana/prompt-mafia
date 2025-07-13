@@ -95,6 +95,28 @@ export default function App() {
       setIsPromptSubmitted(false); 
       setPhase("PROMPT"); 
     });
+
+    socket.on("rejoin_game", ({ status, round, eliminatedPlayers, cards, votes, turnOrder, currentTurn }) => {
+      console.log("Rejoignant une partie en cours:", { status, round });
+      setPhase(status);
+      setRound(round);
+      setEliminatedPlayers(eliminatedPlayers || []);
+      setCards(cards || []);
+      setVotes(votes || []);
+      setOrder(turnOrder || []);
+      setCurrentPlayerId(turnOrder && turnOrder[currentTurn] ? turnOrder[currentTurn] : null);
+      
+      const currentPlayerCard = cards?.find(card => card.playerId === socket.id);
+      if (currentPlayerCard) {
+        setIsPromptSubmitted(true);
+      }
+      
+      const currentPlayerVote = votes?.find(vote => vote.voterId === socket.id);
+      if (currentPlayerVote) {
+        setVoteSelected(currentPlayerVote.votedPlayerId);
+        setVoteConfirmed(true);
+      }
+    });
       return () => {
       socket.off("update_players");
       socket.off("assign_roles");
@@ -107,6 +129,7 @@ export default function App() {
       socket.off("round_result");
       socket.off("game_over");
       socket.off("new_round");
+      socket.off("rejoin_game");
     };
   }, []);  
   const restartGame = () => {
