@@ -18,7 +18,7 @@ export default function ChatBox({ messages, onSend }) {
     <div className="flex flex-col h-full">
       <div 
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent min-h-0"
+        className="flex-1 overflow-hidden p-4 space-y-2 min-h-0 flex flex-col justify-end"
       >
         {messages.map((msg, i) => (
           <div key={i} className="text-white break-words">
@@ -36,7 +36,7 @@ export default function ChatBox({ messages, onSend }) {
             setInput("");
           }
         }}
-        className="mt-4 flex-shrink-0"
+        className="mt-4"
       >
         <div className="relative">
           <input

@@ -184,8 +184,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
       <div className="min-h-screen flex">
-        {/* Sidebar gauche - Joueurs */}
-        <div className="w-72 fixed left-4 top-6 bottom-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20">
+        <div className="w-[20%] fixed left-4 top-4 bottom-4 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col">
           <PlayerSidebar 
             players={players}
             currentPlayerId={currentPlayerId}
@@ -194,12 +193,11 @@ export default function App() {
           />
         </div>
         
-        {/* Zone de Jeu - Centre */}
-        <div className="flex-1 flex flex-col p-6 ml-80 mr-80">
+        <div className="flex-1 flex flex-col ml-[calc(20%+2rem)] mr-[calc(20%+2rem)] p-4">
           {/* Phase d'attente */}
           {phase === "WAITING" && (
             <div className="flex-1 flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-12 text-center border border-white/20">                <h1 className="text-5xl font-bold mb-8 text-purple-400">
+              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-12 text-center border border-white/20 w-full max-w-4xl">                <h1 className="text-5xl font-bold mb-8 text-purple-400">
                   Subterfuge
                 </h1>
                 <div className="mb-8">
@@ -454,9 +452,9 @@ export default function App() {
         </div>
         
         {/* Sidebar droite - Chat */}
-        <div className="w-72 fixed right-4 top-6 bottom-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col">
-          <h3 className="font-bold text-2xl mb-4 text-center text-purple-300">Chat</h3>
-          <div className="flex-1">
+        <div className="w-[20%] fixed right-4 top-4 bottom-4 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 flex flex-col overflow-hidden">
+          <h3 className="font-bold text-2xl mb-4 text-center text-purple-300 px-6 pt-6">Chat</h3>
+          <div className="flex-1 px-6 pb-6 overflow-hidden">
             <ChatBox 
               messages={chat} 
               onSend={msg => socket.emit("chat_message", { roomId, username, message: msg })} 
