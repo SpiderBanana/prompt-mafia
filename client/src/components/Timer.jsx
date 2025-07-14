@@ -7,7 +7,7 @@ export default function Timer({ duration, onEnd }) {
     return () => clearTimeout(t);
   }, [time]);
   return (
-    <div className="text-xl font-mono text-center text-white">
+    <div className="text-lg lg:text-xl font-mono text-center text-white">
       {time}s
     </div>
   );

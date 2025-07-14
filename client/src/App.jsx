@@ -166,7 +166,7 @@ export default function App() {
   // Écran de connexion
   if (!joined) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center p-4">
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -182,20 +182,20 @@ export default function App() {
               });
             }
           }}
-          className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col gap-6 w-[500px] p-16 border border-white/20"
+          className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col gap-4 lg:gap-6 w-full max-w-md lg:max-w-lg p-8 lg:p-16 border border-white/20"
         >
-          <h1 className="text-5xl font-bold text-center mb-8 text-purple-400">
+          <h1 className="text-3xl lg:text-5xl font-bold text-center mb-6 lg:mb-8 text-purple-400">
             Subterfuge
           </h1>
           
           {connectionError && (
-            <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-4 mb-4">
-              <p className="text-red-300 text-center">{connectionError}</p>
+            <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-3 lg:p-4 mb-3 lg:mb-4">
+              <p className="text-red-300 text-center text-sm lg:text-base">{connectionError}</p>
             </div>
           )}
 
           <input 
-            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
+            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-3 lg:p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-base lg:text-lg" 
             value={username} 
             onChange={e => setUsername(e.target.value)} 
             placeholder="Votre pseudo" 
@@ -204,14 +204,14 @@ export default function App() {
           />
           
           <input 
-            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-lg" 
+            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-3 lg:p-4 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none text-base lg:text-lg" 
             value={roomId} 
             onChange={e => setRoomId(e.target.value)} 
             placeholder="Nom de la room" 
             required
           />
           
-          <button className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold rounded-xl py-4 px-8 text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
+          <button className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold rounded-xl py-3 lg:py-4 px-6 lg:px-8 text-lg lg:text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
             Rejoindre la partie
           </button>
         </form>
@@ -221,35 +221,50 @@ export default function App() {
   // Interface principale du jeu
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
-      <div className="min-h-screen flex">
-        <div className="w-[20%] fixed left-4 top-4 bottom-4 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-white/20 flex flex-col">
-          <PlayerSidebar 
-            players={players}
-            currentPlayerId={currentPlayerId}
-            myWord={myWord}
-            eliminatedPlayers={eliminatedPlayers}
-          />
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        {/* Sidebar gauche - Joueurs (responsive) */}
+        <div className="lg:w-[20%] lg:fixed lg:left-4 lg:top-4 lg:bottom-4 w-full lg:bg-white/10 lg:backdrop-blur-lg lg:rounded-2xl lg:shadow-2xl lg:border lg:border-white/20 flex flex-col lg:p-6 p-4">
+          <div className="lg:hidden bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-4 mb-4 border border-white/20">
+            <PlayerSidebar 
+              players={players}
+              currentPlayerId={currentPlayerId}
+              myWord={myWord}
+              eliminatedPlayers={eliminatedPlayers}
+              isMobile={true}
+            />
+          </div>
+          <div className="hidden lg:flex lg:flex-col lg:h-full">
+            <PlayerSidebar 
+              players={players}
+              currentPlayerId={currentPlayerId}
+              myWord={myWord}
+              eliminatedPlayers={eliminatedPlayers}
+              isMobile={false}
+            />
+          </div>
         </div>
         
-        <div className="flex-1 flex flex-col ml-[calc(20%+2rem)] mr-[calc(20%+2rem)] p-4">
+        {/* Contenu principal */}
+        <div className="flex-1 flex flex-col lg:ml-[calc(20%+2rem)] lg:mr-[calc(20%+2rem)] p-4 lg:p-4 pb-20 lg:pb-4">
           {/* Phase d'attente */}
           {phase === "WAITING" && (
             <div className="flex-1 flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-12 text-center border border-white/20 w-full max-w-4xl">                <h1 className="text-5xl font-bold mb-8 text-purple-400">
+              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-6 lg:p-12 text-center border border-white/20 w-full max-w-4xl">
+                <h1 className="text-3xl lg:text-5xl font-bold mb-6 lg:mb-8 text-purple-400">
                   Subterfuge
                 </h1>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-2 text-white">
+                <div className="mb-6 lg:mb-8">
+                  <h2 className="text-xl lg:text-2xl font-semibold mb-2 text-white">
                     Joueurs connectés ({players.length})
                   </h2>
-                  <p className="text-sm text-gray-300 mb-6">
+                  <p className="text-xs lg:text-sm text-gray-300 mb-4 lg:mb-6">
                     {isHost ? "Vous êtes l'hôte de cette room" : "En attente de l'hôte..."}
                   </p>
-                  <div className="flex flex-wrap gap-3 justify-center mb-8">
+                  <div className="flex flex-wrap gap-2 lg:gap-3 justify-center mb-6 lg:mb-8">
                     {players.map((player) => (
                       <span 
                         key={player.id} 
-                        className={`backdrop-blur px-6 py-3 rounded-full font-medium border ${
+                        className={`backdrop-blur px-3 lg:px-6 py-2 lg:py-3 rounded-full font-medium border text-sm lg:text-base ${
                           player.isHost 
                             ? 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30' 
                             : 'bg-blue-500/20 text-blue-200 border-blue-400/30'
@@ -264,17 +279,17 @@ export default function App() {
                     isHost ? (
                       <button
                         onClick={() => socket.emit("start_game", { roomId })}
-                        className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-4 px-12 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                        className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-3 lg:py-4 px-6 lg:px-12 rounded-2xl text-lg lg:text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 w-full lg:w-auto"
                       >
                         Démarrer la partie
                       </button>
                     ) : (
-                      <p className="text-gray-300 text-xl">
+                      <p className="text-gray-300 text-lg lg:text-xl">
                         Attendez que l'hôte démarre la partie...
                       </p>
                     )
                   ) : (
-                    <p className="text-gray-300 text-xl">
+                    <p className="text-gray-300 text-lg lg:text-xl">
                       Attendez au moins 3 joueurs pour commencer... ({players.length}/3)
                     </p>
                   )}
@@ -286,19 +301,20 @@ export default function App() {
           {/* Phases de jeu */}
           {phase !== "WAITING" && (
             <div className="flex-1 flex flex-col">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">                <h1 className="text-3xl font-bold text-center mb-4 text-purple-400">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-4 lg:p-6 mb-4 lg:mb-6 border border-white/20">
+                <h1 className="text-2xl lg:text-3xl font-bold text-center mb-2 lg:mb-4 text-purple-400">
                   Subterfuge
                 </h1>
                 
                 {/* Notification du tour actuel */}
                 {phase === "PROMPT" && currentPlayerId && (
-                  <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 p-4 rounded-xl">
+                  <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 p-3 lg:p-4 rounded-xl">
                     <div className="flex items-center justify-center">
                       <div className="flex-shrink-0">
-                        <span className="text-3xl"></span>
+                        <span className="text-2xl lg:text-3xl"></span>
                       </div>
                       <div className="ml-3 text-center">
-                        <p className="text-xl font-medium text-blue-200">
+                        <p className="text-lg lg:text-xl font-medium text-blue-200">
                           {currentPlayerId === socket.id ? (
                             "C'est votre tour ! Créez votre prompt."
                           ) : (
@@ -338,10 +354,10 @@ export default function App() {
                 
                 {/* Message de confirmation d'envoi */}
                 {phase === "PROMPT" && currentPlayerId === socket.id && isPromptSubmitted && (
-                  <div className="bg-green-500/10 backdrop-blur-lg border border-green-400/30 rounded-2xl shadow-xl p-8 mb-6">
+                  <div className="bg-green-500/10 backdrop-blur-lg border border-green-400/30 rounded-2xl shadow-xl p-6 lg:p-8 mb-4 lg:mb-6">
                     <div className="text-center">
-                      <h2 className="text-3xl font-bold text-green-300 mb-4">Prompt envoyé !</h2>
-                      <p className="text-green-200 text-lg">
+                      <h2 className="text-2xl lg:text-3xl font-bold text-green-300 mb-2 lg:mb-4">Prompt envoyé !</h2>
+                      <p className="text-green-200 text-base lg:text-lg">
                         Votre prompt a été envoyé avec succès. L'image est en cours de génération...
                       </p>
                     </div>
@@ -350,13 +366,14 @@ export default function App() {
                 
                 {/* Phase de discussion et vote */}
                 {phase === "DISCUSSION" && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
-                    <h2 className="text-3xl font-bold text-center mb-6 text-white">Phase de Discussion</h2>
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-4 lg:p-6 mb-4 lg:mb-6 border border-white/20">
+                    <h2 className="text-2xl lg:text-3xl font-bold text-center mb-4 lg:mb-6 text-white">Phase de Discussion</h2>
                     <Timer duration={60} onEnd={() => {
                       socket.emit("force_vote_end", { roomId });
                     }} />
-                    <div className="mt-8">
-                      <h3 className="text-2xl font-semibold mb-6 text-center text-white">Votez pour l'intrus :</h3>                      <VoteZone
+                    <div className="mt-6 lg:mt-8">
+                      <h3 className="text-xl lg:text-2xl font-semibold mb-4 lg:mb-6 text-center text-white">Votez pour l'intrus :</h3>
+                      <VoteZone
                         players={players}
                         votes={votes}
                         cards={cards}
@@ -380,22 +397,22 @@ export default function App() {
                 
                 {/* Résultats */}
                 {phase === "RESULT" && result && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 text-center border border-white/20">
-                    <h2 className="text-4xl font-bold mb-6 text-white">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 lg:p-8 text-center border border-white/20">
+                    <h2 className="text-3xl lg:text-4xl font-bold mb-4 lg:mb-6 text-white">
                       {result.intruderFound
                         ? "L'intrus a été découvert !"
                         : "L'intrus est passé inaperçu..."}
                     </h2>
-                    <div className="text-2xl mt-6 text-white">
+                    <div className="text-xl lg:text-2xl mt-4 lg:mt-6 text-white">
                       L'intrus était : <span className="font-bold text-red-400">{result.intruder.username}</span>
                     </div>
-                    <div className="mt-8">
-                      <h3 className="text-xl font-semibold mb-4 text-white">Récapitulatif des votes :</h3>
+                    <div className="mt-6 lg:mt-8">
+                      <h3 className="text-lg lg:text-xl font-semibold mb-3 lg:mb-4 text-white">Récapitulatif des votes :</h3>
                       <div className="space-y-2">
                         {Object.entries(result.voteCount || {}).map(([playerId, count]) => {
                           const player = players.find(p => p.id === playerId);
                           return (
-                            <div key={playerId} className="text-lg text-gray-200">
+                            <div key={playerId} className="text-base lg:text-lg text-gray-200">
                               {player?.username} : {count} vote(s)
                             </div>
                           );
@@ -407,13 +424,13 @@ export default function App() {
                 
                 {/* Résultats de round */}
                 {phase === "ROUND_RESULT" && roundResult && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 text-center border border-white/20">
-                    <h2 className="text-3xl font-bold mb-4 text-white">Résultat du Round {round - 1}</h2>
-                    <p className="text-xl mb-4 text-gray-200">{roundResult.message}</p>
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 lg:p-8 text-center border border-white/20">
+                    <h2 className="text-2xl lg:text-3xl font-bold mb-3 lg:mb-4 text-white">Résultat du Round {round - 1}</h2>
+                    <p className="text-lg lg:text-xl mb-3 lg:mb-4 text-gray-200">{roundResult.message}</p>
                     
                     {roundResult.eliminatedPlayer && (
-                      <div className="mb-4">
-                        <span className="text-lg text-white">
+                      <div className="mb-3 lg:mb-4">
+                        <span className="text-base lg:text-lg text-white">
                           <span className="font-bold text-red-600">{roundResult.eliminatedPlayer.username}</span>
                           {roundResult.eliminatedPlayer.isIntruder ? " (L'INTRUS)" : " (Innocent)"}
                           {" "}a été éliminé !
@@ -421,8 +438,8 @@ export default function App() {
                       </div>
                     )}
                     
-                    <div className="mt-6">
-                      <h3 className="text-lg font-semibold mb-2 text-white">Votes de ce round :</h3>
+                    <div className="mt-4 lg:mt-6">
+                      <h3 className="text-base lg:text-lg font-semibold mb-2 text-white">Votes de ce round :</h3>
                       {Object.entries(roundResult.voteCount || {}).map(([playerId, count]) => {
                         const player = [...players, ...eliminatedPlayers].find(p => p.id === playerId);
                         return (
@@ -433,14 +450,14 @@ export default function App() {
                       })}
                     </div>
                     
-                    <div className="mt-4 text-sm text-gray-400">
+                    <div className="mt-3 lg:mt-4 text-sm text-gray-400">
                       Joueurs restants : {roundResult.remainingPlayers}
                       {roundResult.remainingNonIntruders !== undefined && 
                         ` (${roundResult.remainingNonIntruders} innocents)`
                       }
                     </div>
                     
-                    <div className="mt-6 p-4 bg-blue-500/10 border border-blue-400/30 rounded-xl">
+                    <div className="mt-4 lg:mt-6 p-3 lg:p-4 bg-blue-500/10 border border-blue-400/30 rounded-xl">
                       <p className="text-blue-200 text-sm">
                        Nouveaux mots distribués pour le round {round} !
                       </p>
@@ -449,7 +466,7 @@ export default function App() {
                       </p>
                     </div>
                     
-                    <div className="mt-4 text-gray-500">
+                    <div className="mt-3 lg:mt-4 text-gray-500">
                       Nouveau round dans 5 secondes...
                     </div>
                   </div>
@@ -457,16 +474,16 @@ export default function App() {
 
                 {/* Fin de jeu */}
                 {phase === "GAME_OVER" && result && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 text-center border border-white/20">
-                    <h2 className="text-4xl font-bold mb-6 text-white">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 lg:p-8 text-center border border-white/20">
+                    <h2 className="text-3xl lg:text-4xl font-bold mb-4 lg:mb-6 text-white">
                       {result.winner === "non-intruders" 
                         ? "Les Innocents ont gagné !" 
                         : "L'Intrus a gagné !"}
                     </h2>
                     
                     {result.eliminatedPlayer && (
-                      <div className="mb-6">
-                        <p className="text-xl text-white">
+                      <div className="mb-4 lg:mb-6">
+                        <p className="text-lg lg:text-xl text-white">
                           <span className="font-bold text-red-600">{result.eliminatedPlayer.username}</span>
                           {result.eliminatedPlayer.isIntruder ? " (L'INTRUS)" : " (Innocent)"}
                           {" "}a été éliminé en dernier !
@@ -474,18 +491,18 @@ export default function App() {
                       </div>
                     )}
                     
-                    <div className="text-xl mt-4 mb-6 text-white">
+                    <div className="text-lg lg:text-xl mt-3 lg:mt-4 mb-4 lg:mb-6 text-white">
                       L'intrus était : <span className="font-bold text-red-600">{result.intruder.username}</span>
                     </div>
                     
                     {result.winner === "intruder" && (
-                      <p className="text-lg text-gray-300 mb-4">
+                      <p className="text-base lg:text-lg text-gray-300 mb-3 lg:mb-4">
                         L'intrus a survécu jusqu'à ce qu'il ne reste qu'un innocent !
                       </p>
                     )}
                     
-                    <div className="mt-6">
-                      <h3 className="text-lg font-semibold mb-2 text-white">Votes finaux :</h3>
+                    <div className="mt-4 lg:mt-6">
+                      <h3 className="text-base lg:text-lg font-semibold mb-2 text-white">Votes finaux :</h3>
                       {Object.entries(result.voteCount || {}).map(([playerId, count]) => {
                         const player = [...players, ...eliminatedPlayers].find(p => p.id === playerId);
                         return (
@@ -496,13 +513,11 @@ export default function App() {
                       })}
                     </div>
                     
-
-                    
                     {/* Bouton pour retourner à l'écran d'attente */}
-                    <div className="mt-10">
+                    <div className="mt-8 lg:mt-10">
                       <button
                         onClick={restartGame}
-                        className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-4 px-8 rounded-2xl text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                        className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-3 lg:py-4 px-6 lg:px-8 rounded-2xl text-lg lg:text-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 w-full lg:w-auto"
                       >
                         Retour au lobby
                       </button>
@@ -514,14 +529,27 @@ export default function App() {
           )}
         </div>
         
-        {/* Sidebar droite - Chat */}
-        <div className="w-[20%] fixed right-4 top-4 bottom-4 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 flex flex-col overflow-hidden">
-          <h3 className="font-bold text-2xl mb-4 text-center text-purple-300 px-6 pt-6">Chat</h3>
-          <div className="flex-1 px-6 pb-6 overflow-hidden">
+        {/* Chat responsive */}
+        <div className="lg:w-[20%] lg:fixed lg:right-4 lg:top-4 lg:bottom-4 w-full lg:bg-white/10 lg:backdrop-blur-lg lg:rounded-2xl lg:shadow-2xl lg:border lg:border-white/20 flex flex-col lg:overflow-hidden">
+          {/* Chat sur mobile - position fixed en bas */}
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/20 p-4 z-50">
             <ChatBox 
               messages={chat} 
               onSend={msg => socket.emit("chat_message", { roomId, username, message: msg })} 
+              isMobile={true}
             />
+          </div>
+          
+          {/* Chat sur desktop */}
+          <div className="hidden lg:flex lg:flex-col lg:h-full">
+            <h3 className="font-bold text-2xl mb-4 text-center text-purple-300 px-6 pt-6">Chat</h3>
+            <div className="flex-1 px-6 pb-6 overflow-hidden">
+              <ChatBox 
+                messages={chat} 
+                onSend={msg => socket.emit("chat_message", { roomId, username, message: msg })} 
+                isMobile={false}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -562,20 +590,20 @@ function PromptForm({ onSubmit, myWord, promptError = "", onErrorClear }) {
   const isValid = prompt.trim() && !checkForForbiddenWord(prompt, myWord);
   
   return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-6 border border-white/20">
-      <h2 className="text-3xl font-bold text-center mb-6 text-white">À votre tour !</h2>
+    <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 lg:p-8 mb-4 lg:mb-6 border border-white/20">
+      <h2 className="text-2xl lg:text-3xl font-bold text-center mb-4 lg:mb-6 text-white">À votre tour !</h2>
       
       {/* Affichage de l'erreur du serveur (prompt rejeté) */}
       {promptError && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-400/30 rounded-xl">
+        <div className="mb-4 lg:mb-6 p-3 lg:p-4 bg-red-500/10 border border-red-400/30 rounded-xl">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 lg:w-6 lg:h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-medium text-red-300 mb-1">Prompt rejeté</h3>
+              <h3 className="text-base lg:text-lg font-medium text-red-300 mb-1">Prompt rejeté</h3>
               <p className="text-red-200 text-sm">{promptError}</p>
               <p className="text-red-100 text-xs mt-2">Veuillez modifier votre prompt et réessayer.</p>
             </div>
@@ -584,26 +612,26 @@ function PromptForm({ onSubmit, myWord, promptError = "", onErrorClear }) {
       )}
       
       <form
-        className="flex flex-col gap-6"
+        className="flex flex-col gap-4 lg:gap-6"
         onSubmit={handleSubmit}
       >
         <div>
           <textarea
-            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-6 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none resize-none text-lg w-full"
-            rows={5}
+            className="border-2 border-white/20 bg-white/10 backdrop-blur rounded-xl p-4 lg:p-6 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none resize-none text-base lg:text-lg w-full"
+            rows={4}
             value={prompt}
             onChange={handlePromptChange}
             placeholder={`Décrivez une scène en rapport avec votre mot-clé... Soyez créatif ! (Ne mentionnez pas "${myWord}")`}
             required
           />
           {error && (
-            <div className="mt-2 p-3 bg-red-500/10 border border-red-400/30 rounded-lg">
+            <div className="mt-2 p-2 lg:p-3 bg-red-500/10 border border-red-400/30 rounded-lg">
               <p className="text-red-300 text-sm">{error}</p>
             </div>
           )}
         </div>
         <button 
-          className={`backdrop-blur-lg border-2 font-bold rounded-xl py-4 px-8 text-xl transition-all duration-300 shadow-xl transform ${
+          className={`backdrop-blur-lg border-2 font-bold rounded-xl py-3 lg:py-4 px-6 lg:px-8 text-lg lg:text-xl transition-all duration-300 shadow-xl transform w-full ${
             isValid 
               ? 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white hover:shadow-2xl hover:scale-105' 
               : 'bg-gray-500/10 border-gray-500/20 text-gray-400 cursor-not-allowed'

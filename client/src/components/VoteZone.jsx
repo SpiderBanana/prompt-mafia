@@ -30,9 +30,9 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
   const orderedPlayers = createOrderedPlayers();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Zone de sélection des joueurs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-3">
         {orderedPlayers.map((p, index) => {
           const voteCount = getVoteCount(p.id);
           const isSelected = selected === p.id;
@@ -62,9 +62,9 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
                 onChange={() => !disabled && !hasConfirmed && onVote(p.id)}
                 className="sr-only"
               />
-              <div className="p-3 text-center">
+              <div className="p-2 lg:p-3 text-center">
                 {/* Nom du joueur */}
-                <div className={`font-medium text-sm mb-2 ${isSelected ? 'text-red-200' : 'text-white'}`}>
+                <div className={`font-medium text-xs lg:text-sm mb-1 lg:mb-2 ${isSelected ? 'text-red-200' : 'text-white'}`}>
                   {p.username}
                 </div>
                 
@@ -107,8 +107,8 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
             className="sr-only"
           />
           
-          <div className="p-3 text-center flex items-center justify-center h-full">
-            <div className={`font-medium text-sm ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
+          <div className="p-2 lg:p-3 text-center flex items-center justify-center h-full">
+            <div className={`font-medium text-xs lg:text-sm ${selected === "skip" ? 'text-blue-200' : 'text-white'}`}>
               Passer
             </div>
           </div>
@@ -124,11 +124,11 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
         >
           <button
             onClick={() => onConfirm && onConfirm(selected)}
-            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105"
+            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 lg:py-4 px-6 lg:px-8 rounded-2xl transition-all duration-300 text-base lg:text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 w-full lg:w-auto"
           >
             Confirmer mon vote
           </button>
-          <p className="text-sm text-yellow-500 mt-3">
+          <p className="text-xs lg:text-sm text-yellow-500 mt-2 lg:mt-3">
             ⚠️ Attention : une fois confirmé, vous ne pourrez plus changer votre vote !
           </p>
         </motion.div>
@@ -141,18 +141,17 @@ export default function VoteZone({ players, votes = [], onVote, selected, disabl
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="bg-white/10 backdrop-blur-lg border border-green-400/30 text-green-300 px-6 py-4 rounded-2xl inline-block shadow-lg">
+          <div className="bg-white/10 backdrop-blur-lg border border-green-400/30 text-green-300 px-4 lg:px-6 py-3 lg:py-4 rounded-2xl inline-block shadow-lg">
             <div className="flex items-center space-x-2">
-             
               <div>
-                <span className="font-bold text-lg">Vote confirmé !</span>
+                <span className="font-bold text-base lg:text-lg">Vote confirmé !</span>
                 {selected && selected !== "skip" && (
-                  <div className="text-sm mt-1 text-green-200">
+                  <div className="text-xs lg:text-sm mt-1 text-green-200">
                     Vous avez voté pour <span className="font-semibold text-green-100">{orderedPlayers.find(p => p.id === selected)?.username}</span>
                   </div>
                 )}
                 {selected === "skip" && (
-                  <div className="text-sm mt-1 text-green-200">
+                  <div className="text-xs lg:text-sm mt-1 text-green-200">
                     Vous avez choisi de <span className="font-semibold text-green-100">passer le tour</span>
                   </div>
                 )}

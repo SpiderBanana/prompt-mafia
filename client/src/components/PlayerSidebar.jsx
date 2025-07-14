@@ -1,6 +1,61 @@
 ﻿import { motion } from "framer-motion";
 
-export default function PlayerSidebar({ players, currentPlayerId, myWord, eliminatedPlayers = [] }) {
+export default function PlayerSidebar({ players, currentPlayerId, myWord, eliminatedPlayers = [], isMobile = false }) {
+  if (isMobile) {
+    return (
+      <div className="text-white">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold text-purple-400">
+            Joueurs ({players.length - eliminatedPlayers.length}/{players.length})
+          </h2>
+          {myWord && (
+            <div className="px-3 py-1 bg-white/20 backdrop-blur rounded-lg border border-white/30">
+              <span className="text-xs text-gray-200">Ton mot: </span>
+              <span className="text-sm font-bold text-blue-300">{myWord}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Liste horizontale des joueurs pour mobile */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {players.map((player, index) => {
+            const isCurrentPlayer = player.id === currentPlayerId;
+            const isEliminated = eliminatedPlayers.some(p => p.id === player.id);
+            
+            return (
+              <motion.div
+                key={player.id}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05 }}
+                className={`flex-shrink-0 p-2 rounded-lg border transition-all duration-300 min-w-[80px] text-center ${
+                  isEliminated 
+                    ? 'bg-red-900/50 backdrop-blur border-red-500/50 opacity-60' 
+                    : isCurrentPlayer
+                    ? 'bg-gradient-to-r from-yellow-500/80 to-orange-500/80 backdrop-blur border-yellow-400/60 shadow-lg shadow-yellow-500/20'
+                    : 'bg-white/10 backdrop-blur border-white/20'
+                }`}
+              >
+                <div className={`w-2 h-2 rounded-full mx-auto mb-1 ${
+                  isEliminated 
+                    ? 'bg-red-500' 
+                    : isCurrentPlayer 
+                    ? 'bg-yellow-400 animate-pulse' 
+                    : 'bg-green-400'
+                }`} />
+                <p className={`text-xs font-medium truncate ${
+                  isEliminated ? 'text-red-300 line-through' : 'text-white'
+                }`}>
+                  {player.username}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col text-white">
       <div className="text-center mb-6">

@@ -25,7 +25,7 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 p-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 xl:gap-8 p-4 lg:p-6">
       {allCards.map((card, idx) => {
         const isEliminated = isPlayerEliminated(card.playerId);
         
@@ -89,11 +89,11 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
             )}
             
             {/* Badge du nom du joueur */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 lg:p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                    w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-xs lg:text-sm font-bold
                     ${isEliminated
                       ? 'bg-red-500 text-white'
                       : card.playerId === currentUserId 
@@ -104,7 +104,7 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
                     {card.username.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <span className={`font-semibold text-sm ${
+                    <span className={`font-semibold text-xs lg:text-sm ${
                       isEliminated ? 'text-red-300 line-through' : 'text-white'
                     }`}>
                       {card.username}
