@@ -313,7 +313,6 @@ export default function App() {
               
               {/* Contenu principal scrollable */}
               <div className="flex-1 overflow-y-auto">
-                {/* Galerie d'images - toujours visible */}
                 <CardGallery 
                   cards={cards} 
                   votes={votes} 
@@ -323,13 +322,12 @@ export default function App() {
                   eliminatedPlayers={eliminatedPlayers}
                 />
                 
-                {/* Formulaire de prompt - affiché quand c'est votre tour */}
                 {phase === "PROMPT" && currentPlayerId === socket.id && !isPromptSubmitted && (
                   <PromptForm 
                     onSubmit={prompt => {
                       socket.emit("submit_prompt", { roomId, prompt });
                       setIsPromptSubmitted(true);
-                      setPromptError(""); // Effacer les erreurs précédentes
+                      setPromptError(""); 
                     }}
                     isSubmitted={false}
                     myWord={myWord}
