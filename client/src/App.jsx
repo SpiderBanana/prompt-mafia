@@ -313,7 +313,18 @@ export default function App() {
               
               {/* Contenu principal scrollable */}
               <div className="flex-1 overflow-y-auto">
-                {phase === "PROMPT" && currentPlayerId === socket.id && !isPromptSubmitted ? (
+                {/* Galerie d'images - toujours visible */}
+                <CardGallery 
+                  cards={cards} 
+                  votes={votes} 
+                  currentUserId={socket.id}
+                  players={players}
+                  currentPlayerId={currentPlayerId}
+                  eliminatedPlayers={eliminatedPlayers}
+                />
+                
+                {/* Formulaire de prompt - affiché quand c'est votre tour */}
+                {phase === "PROMPT" && currentPlayerId === socket.id && !isPromptSubmitted && (
                   <PromptForm 
                     onSubmit={prompt => {
                       socket.emit("submit_prompt", { roomId, prompt });
@@ -325,29 +336,18 @@ export default function App() {
                     promptError={promptError}
                     onErrorClear={() => setPromptError("")}
                   />
-                ) : (
-                  <>
-                    <CardGallery 
-                      cards={cards} 
-                      votes={votes} 
-                      currentUserId={socket.id}
-                      players={players}
-                      currentPlayerId={currentPlayerId}
-                      eliminatedPlayers={eliminatedPlayers}
-                    />
-                    
-                   
-                    {phase === "PROMPT" && currentPlayerId === socket.id && isPromptSubmitted && (
-                      <div className="bg-green-500/10 backdrop-blur-lg border border-green-400/30 rounded-2xl shadow-xl p-8 mb-6">
-                        <div className="text-center">
-                          <h2 className="text-3xl font-bold text-green-300 mb-4">Prompt envoyé !</h2>
-                          <p className="text-green-200 text-lg">
-                            Votre prompt a été envoyé avec succès. L'image est en cours de génération...
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </>
+                )}
+                
+                {/* Message de confirmation d'envoi */}
+                {phase === "PROMPT" && currentPlayerId === socket.id && isPromptSubmitted && (
+                  <div className="bg-green-500/10 backdrop-blur-lg border border-green-400/30 rounded-2xl shadow-xl p-8 mb-6">
+                    <div className="text-center">
+                      <h2 className="text-3xl font-bold text-green-300 mb-4">Prompt envoyé !</h2>
+                      <p className="text-green-200 text-lg">
+                        Votre prompt a été envoyé avec succès. L'image est en cours de génération...
+                      </p>
+                    </div>
+                  </div>
                 )}
                 
                 {/* Phase de discussion et vote */}
