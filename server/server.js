@@ -222,6 +222,11 @@ io.on("connection", (socket) => {
           prepareNewRound(games[roomId]);
           games[roomId].status = "PROMPT";
           
+          // Envoyer les nouveaux rôles avec les nouveaux mots
+          io.to(roomId).emit("assign_roles", games[roomId].players.map(p => ({
+            id: p.id, word: p.word
+          })));
+          
           io.to(roomId).emit("new_round", {
             round: games[roomId].round,
             eliminatedPlayers: games[roomId].eliminatedPlayers
@@ -264,6 +269,11 @@ io.on("connection", (socket) => {
       setTimeout(() => {
         prepareNewRound(game);
         game.status = "PROMPT";
+        
+        // Envoyer les nouveaux rôles avec les nouveaux mots
+        io.to(roomId).emit("assign_roles", game.players.map(p => ({
+          id: p.id, word: p.word
+        })));
         
         io.to(roomId).emit("new_round", {
           round: game.round,

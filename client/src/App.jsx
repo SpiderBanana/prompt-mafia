@@ -53,7 +53,10 @@ export default function App() {
       const me = roles.find(r => r.id === socket.id);
       if (me) {
         setMyWord(me.word);
-        setPhase("PROMPT");
+        // Ne changer la phase que si ce n'est pas déjà en cours de jeu
+        if (phase === "WAITING") {
+          setPhase("PROMPT");
+        }
       }
     });    socket.on("start_turn", ({ currentPlayerId, order }) => {
       setCurrentPlayerId(currentPlayerId);
@@ -439,7 +442,16 @@ export default function App() {
                       }
                     </div>
                     
-                    <div className="mt-6 text-gray-500">
+                    <div className="mt-6 p-4 bg-blue-500/10 border border-blue-400/30 rounded-xl">
+                      <p className="text-blue-200 text-sm">
+                       Nouveaux mots distribués pour le round {round} !
+                      </p>
+                      <p className="text-blue-100 text-xs mt-1">
+                        L'intrus garde son rôle mais avec un nouveau mot différent.
+                      </p>
+                    </div>
+                    
+                    <div className="mt-4 text-gray-500">
                       Nouveau round dans 5 secondes...
                     </div>
                   </div>

@@ -63,11 +63,28 @@ function addPlayerToGame(game, id, username) {
   }
 }
 
-function assignWordsAndRoles(game) {
+function assignWordsAndRoles(game, keepSameIntruder = false) {
   const theme = wordsList[Math.floor(Math.random() * wordsList.length)];
   const mainWord = theme.word;
   const intruderWord = theme.intruder;
-  const intruderIdx = Math.floor(Math.random() * game.players.length);
+  
+  let intruderIdx;
+  if (keepSameIntruder) {
+    // Garder le même intrus que le round précédent
+    const currentIntruder = game.players.find(p => p.isIntruder && !p.isEliminated);
+    if (currentIntruder) {
+      intruderIdx = game.players.findIndex(p => p.id === currentIntruder.id);
+    } else {
+      // Si l'intrus précédent a été éliminé, choisir un nouveau au hasard
+      const activePlayers = game.players.filter(p => !p.isEliminated);
+      const randomActivePlayer = activePlayers[Math.floor(Math.random() * activePlayers.length)];
+      intruderIdx = game.players.findIndex(p => p.id === randomActivePlayer.id);
+    }
+  } else {
+    // Premier round : choisir un intrus au hasard
+    intruderIdx = Math.floor(Math.random() * game.players.length);
+  }
+  
   game.players.forEach((p, idx) => {
     p.word = idx === intruderIdx ? intruderWord : mainWord;
     p.isIntruder = idx === intruderIdx;
@@ -243,6 +260,9 @@ function prepareNewRound(game) {
   // Nouveau turnOrder avec seulement les joueurs actifs
   const activePlayers = game.players.filter(p => !p.isEliminated);
   game.turnOrder = shuffle(activePlayers.map(p => p.id));
+  
+  // Réassigner de nouveaux mots en gardant le même intrus
+  assignWordsAndRoles(game, true);
 }
 
 function resetGame(game) {
