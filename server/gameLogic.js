@@ -26,11 +26,12 @@ function addPlayerToGame(game, id, username) {
       word: existingPlayerRecord.word,
       isIntruder: existingPlayerRecord.isIntruder,
       isEliminated: existingPlayerRecord.isEliminated,
-      hasSubmittedPrompt: false, // Reset pour le round actuel
-      hasVoted: false, // Reset pour le round actuel
+      hasSubmittedPrompt: false, 
+      hasVoted: false, 
       vote: null,
       isHost: existingPlayerRecord.isHost,
-      isReturning: true // Marquer comme joueur qui revient
+      isReturning: true, 
+      isDisconnected: false 
     };
     game.players.push(player);
     return player;
@@ -46,11 +47,12 @@ function addPlayerToGame(game, id, username) {
       hasVoted: false,
       vote: null,
       isHost: false,
-      isReturning: false
+      isReturning: false,
+      isDisconnected: false
     };
     game.players.push(player);
     
-    // Ajouter à la liste de tous les joueurs ayant rejoint
+    
     game.allPlayersEverJoined.push({
       username,
       word: null,
@@ -70,18 +72,15 @@ function assignWordsAndRoles(game, keepSameIntruder = false) {
   
   let intruderIdx;
   if (keepSameIntruder) {
-    // Garder le même intrus que le round précédent
     const currentIntruder = game.players.find(p => p.isIntruder && !p.isEliminated);
     if (currentIntruder) {
       intruderIdx = game.players.findIndex(p => p.id === currentIntruder.id);
     } else {
-      // Si l'intrus précédent a été éliminé, choisir un nouveau au hasard
       const activePlayers = game.players.filter(p => !p.isEliminated);
       const randomActivePlayer = activePlayers[Math.floor(Math.random() * activePlayers.length)];
       intruderIdx = game.players.findIndex(p => p.id === randomActivePlayer.id);
     }
   } else {
-    // Premier round : choisir un intrus au hasard
     intruderIdx = Math.floor(Math.random() * game.players.length);
   }
   
@@ -91,6 +90,7 @@ function assignWordsAndRoles(game, keepSameIntruder = false) {
     p.hasSubmittedPrompt = false;
     p.hasVoted = false;
     p.vote = null;
+    
   });
   
   // Mettre à jour le registre de tous les joueurs
@@ -216,11 +216,9 @@ function getResults(game) {
   let winner = null;
   
   if (eliminatedPlayer.isIntruder) {
-    // L'intrus a été éliminé, les non-intrus gagnent
     isGameOver = true;
     winner = "non-intruders";
   } else if (remainingNonIntruders.length <= 1) {
-    // Il ne reste qu'un non-intrus ou moins, l'intrus gagne
     isGameOver = true;
     winner = "intruder";
   }
@@ -242,7 +240,6 @@ function getResults(game) {
 }
 
 function prepareNewRound(game) {
-  // Réinitialiser pour le nouveau round
   game.round += 1;
   game.votes = [];
   game.cards = [];
@@ -266,8 +263,6 @@ function prepareNewRound(game) {
 }
 
 function resetGame(game) {
-  // Réinitialiser les propriétés du jeu tout en gardant les joueurs
-  game.cards = [];
   game.votes = [];
   game.turnOrder = [];
   game.currentTurn = 0;
@@ -275,7 +270,7 @@ function resetGame(game) {
   game.round = 1;
   game.eliminatedPlayers = [];
   
-  // Réinitialiser les propriétés des joueurs
+  
   game.players.forEach(player => {
     player.word = null;
     player.isIntruder = false;
@@ -283,7 +278,7 @@ function resetGame(game) {
     player.hasSubmitted = false;
   });
   
-  // Réinitialiser aussi le registre des joueurs
+  
   game.allPlayersEverJoined.forEach(player => {
     player.word = null;
     player.isIntruder = false;
@@ -294,18 +289,15 @@ function resetGame(game) {
 }
 
 function canPlayerRejoinGame(game, username) {
-  // Vérifier si le joueur a déjà participé à cette room
   const playerRecord = game.allPlayersEverJoined.find(p => p.username === username);
   return playerRecord !== undefined;
 }
 
 function updatePlayerDisconnection(game, playerId) {
-  // Marquer la déconnexion mais garder le record du joueur
   const player = game.players.find(p => p.id === playerId);
   if (player) {
     const record = game.allPlayersEverJoined.find(p => p.username === player.username);
     if (record) {
-      // Mettre à jour le record avec l'état actuel du joueur
       record.word = player.word;
       record.isIntruder = player.isIntruder;
       record.isEliminated = player.isEliminated;

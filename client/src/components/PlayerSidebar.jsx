@@ -21,6 +21,7 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
           {players.map((player, index) => {
             const isCurrentPlayer = player.id === currentPlayerId;
             const isEliminated = eliminatedPlayers.some(p => p.id === player.id);
+            const isDisconnected = player.isDisconnected;
             
             return (
               <motion.div
@@ -31,6 +32,8 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
                 className={`flex-shrink-0 p-2 rounded-lg border transition-all duration-300 min-w-[80px] text-center ${
                   isEliminated 
                     ? 'bg-red-900/50 backdrop-blur border-red-500/50 opacity-60' 
+                    : isDisconnected
+                    ? 'bg-gray-900/50 backdrop-blur border-gray-500/50 opacity-70'
                     : isCurrentPlayer
                     ? 'bg-gradient-to-r from-yellow-500/80 to-orange-500/80 backdrop-blur border-yellow-400/60 shadow-lg shadow-yellow-500/20'
                     : 'bg-white/10 backdrop-blur border-white/20'
@@ -39,15 +42,22 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
                 <div className={`w-2 h-2 rounded-full mx-auto mb-1 ${
                   isEliminated 
                     ? 'bg-red-500' 
+                    : isDisconnected
+                    ? 'bg-gray-500'
                     : isCurrentPlayer 
                     ? 'bg-yellow-400 animate-pulse' 
                     : 'bg-green-400'
                 }`} />
                 <p className={`text-xs font-medium truncate ${
-                  isEliminated ? 'text-red-300 line-through' : 'text-white'
+                  isEliminated ? 'text-red-300 line-through' 
+                  : isDisconnected ? 'text-gray-400' 
+                  : 'text-white'
                 }`}>
                   {player.username}
                 </p>
+                {isDisconnected && !isEliminated && (
+                  <p className="text-xs text-gray-500">Déco</p>
+                )}
               </motion.div>
             );
           })}
@@ -75,6 +85,7 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
         {players.map((player, index) => {
           const isCurrentPlayer = player.id === currentPlayerId;
           const isEliminated = eliminatedPlayers.some(p => p.id === player.id);
+          const isDisconnected = player.isDisconnected;
           
           return (
             <motion.div
@@ -85,6 +96,8 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
               className={`p-3 rounded-xl border transition-all duration-300 ${
                 isEliminated 
                   ? 'bg-red-900/50 backdrop-blur border-red-500/50 opacity-60' 
+                  : isDisconnected
+                  ? 'bg-gray-900/50 backdrop-blur border-gray-500/50 opacity-70'
                   : isCurrentPlayer
                   ? 'bg-gradient-to-r from-yellow-500/80 to-orange-500/80 backdrop-blur border-yellow-400/60 shadow-lg shadow-yellow-500/20'
                   : 'bg-white/10 backdrop-blur border-white/20 hover:bg-white/20'
@@ -94,27 +107,44 @@ export default function PlayerSidebar({ players, currentPlayerId, myWord, elimin
                 <div className={`w-3 h-3 rounded-full ${
                   isEliminated 
                     ? 'bg-red-500' 
+                    : isDisconnected
+                    ? 'bg-gray-500'
                     : isCurrentPlayer 
                     ? 'bg-yellow-400 animate-pulse' 
                     : 'bg-green-400'
                 }`} />
                 <div className="flex-1">
                   <p className={`font-medium ${
-                    isEliminated ? 'text-red-300 line-through' : 'text-white'
+                    isEliminated ? 'text-red-300 line-through' 
+                    : isDisconnected ? 'text-gray-400' 
+                    : 'text-white'
                   }`}>
                     {player.username}
                   </p>
-                  {isCurrentPlayer && !isEliminated && (
+                  {isCurrentPlayer && !isEliminated && !isDisconnected && (
                     <p className="text-xs text-yellow-200">En train de jouer...</p>
+                  )}
+                  {isCurrentPlayer && isDisconnected && !isEliminated && (
+                    <p className="text-xs text-orange-300">C'est son tour - Déconnecté</p>
                   )}
                   {isEliminated && (
                     <p className="text-xs text-red-400">Éliminé</p>
                   )}
+                  {isDisconnected && !isEliminated && !isCurrentPlayer && (
+                    <p className="text-xs text-gray-500">Déconnecté</p>
+                  )}
                 </div>
-                {isCurrentPlayer && !isEliminated && (
+                {isCurrentPlayer && !isEliminated && !isDisconnected && (
                   <div className="text-yellow-400">
                     <svg className="w-4 h-4 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+                {isCurrentPlayer && isDisconnected && !isEliminated && (
+                  <div className="text-orange-400">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                   </div>
                 )}

@@ -38,10 +38,83 @@ io.on("connection", (socket) => {
       return;
     }
     
-    // Vérifier si le joueur est déjà connecté
-    const existingPlayer = games[roomId].players.find(p => p.username === username);
-    if (existingPlayer) {
+    // Vérifier si le joueur est déjà connecté (mais pas déconnecté)
+    const existingConnectedPlayer = games[roomId].players.find(p => p.username === username && !p.isDisconnected);
+    if (existingConnectedPlayer) {
       cb({ error: "Un joueur avec ce pseudo est déjà connecté" });
+      return;
+    }
+    
+    // Vérifier si le joueur était déconnecté et revient
+    const disconnectedPlayer = games[roomId].players.find(p => p.username === username && p.isDisconnected);
+    if (disconnectedPlayer) {
+      const oldId = disconnectedPlayer.id;
+      disconnectedPlayer.id = socket.id;
+      disconnectedPlayer.isDisconnected = false;
+      console.log(`${username} est de retour dans la room ${roomId}`);
+      
+      
+      const turnIndex = games[roomId].turnOrder.indexOf(oldId);
+      if (turnIndex !== -1) {
+        games[roomId].turnOrder[turnIndex] = socket.id;
+      }
+      
+      
+      if (games[roomId].turnOrder[games[roomId].currentTurn] === oldId) {
+        games[roomId].turnOrder[games[roomId].currentTurn] = socket.id;
+      }
+      
+      
+      games[roomId].cards.forEach(card => {
+        if (card.playerId === oldId) {
+          card.playerId = socket.id;
+        }
+      });
+      
+
+      games[roomId].votes.forEach(vote => {
+        if (vote.voterId === oldId) {
+          vote.voterId = socket.id;
+        }
+        if (vote.votedPlayerId === oldId) {
+          vote.votedPlayerId = socket.id;
+        }
+      });
+      
+
+      if (disconnectedPlayer.isHost) {
+        games[roomId].hostId = socket.id;
+      }
+      
+      socket.join(roomId);
+      
+      
+      if (games[roomId].status !== "WAITING") {
+        socket.emit("assign_roles", [{ id: socket.id, word: disconnectedPlayer.word }]);
+        socket.emit("rejoin_game", {
+          status: games[roomId].status,
+          round: games[roomId].round,
+          eliminatedPlayers: games[roomId].eliminatedPlayers,
+          cards: games[roomId].cards,
+          votes: games[roomId].votes,
+          turnOrder: games[roomId].turnOrder,
+          currentTurn: games[roomId].currentTurn
+        });
+      }
+      
+      console.log(`Émission update_players pour la room ${roomId}:`, games[roomId].players.map(p => ({name: p.username, isHost: p.isHost, isDisconnected: p.isDisconnected})));
+      io.to(roomId).emit("update_players", games[roomId].players);
+      
+      
+      if (games[roomId].status === "PROMPT") {
+        const currentPlayerId = games[roomId].turnOrder[games[roomId].currentTurn];
+        io.to(roomId).emit("start_turn", {
+          currentPlayerId: currentPlayerId,
+          order: games[roomId].turnOrder
+        });
+      }
+      
+      cb(disconnectedPlayer);
       return;
     }
     
@@ -161,12 +234,52 @@ io.on("connection", (socket) => {
 
     // Vérifier si tous les joueurs actifs ont soumis leur prompt
     const activePlayers = game.players.filter(p => !p.isEliminated);
-    if (game.cards.length < activePlayers.length) {
+    const submittedCount = activePlayers.filter(p => p.hasSubmittedPrompt || p.isDisconnected).length;
+    
+    if (submittedCount < activePlayers.length) {
+      // Passer au tour suivant
       nextTurn(game);
-      io.to(roomId).emit("start_turn", {
-        currentPlayerId: game.turnOrder[game.currentTurn],
-        order: game.turnOrder
-      });
+      const nextPlayerId = game.turnOrder[game.currentTurn];
+      const nextPlayer = game.players.find(p => p.id === nextPlayerId);
+      
+      // Si le prochain joueur est déconnecté, auto-skip après 30 secondes
+      if (nextPlayer && nextPlayer.isDisconnected) {
+        console.log(`Tour de ${nextPlayer.username} mais il est déconnecté, attente de 30 secondes...`);
+        io.to(roomId).emit("start_turn", {
+          currentPlayerId: nextPlayerId,
+          order: game.turnOrder
+        });
+        
+        // Auto-skip après 30 secondes si toujours déconnecté
+        setTimeout(() => {
+          const currentPlayer = game.players.find(p => p.id === nextPlayerId);
+          if (currentPlayer && currentPlayer.isDisconnected && !currentPlayer.hasSubmittedPrompt) {
+            console.log(`Auto-skip du tour de ${currentPlayer.username} (déconnecté)`);
+            currentPlayer.hasSubmittedPrompt = true; // Marquer comme "soumis" pour skip
+            
+            // Vérifier à nouveau si tous ont soumis
+            const activePlayersCheck = game.players.filter(p => !p.isEliminated);
+            const submittedCountCheck = activePlayersCheck.filter(p => p.hasSubmittedPrompt || p.isDisconnected).length;
+            
+            if (submittedCountCheck >= activePlayersCheck.length) {
+              game.status = "DISCUSSION";
+              io.to(roomId).emit("start_discussion");
+            } else {
+              // Continuer au joueur suivant
+              nextTurn(game);
+              io.to(roomId).emit("start_turn", {
+                currentPlayerId: game.turnOrder[game.currentTurn],
+                order: game.turnOrder
+              });
+            }
+          }
+        }, 30000);
+      } else {
+        io.to(roomId).emit("start_turn", {
+          currentPlayerId: nextPlayerId,
+          order: game.turnOrder
+        });
+      }
     } else {
       game.status = "DISCUSSION";
       io.to(roomId).emit("start_discussion", {});
@@ -200,7 +313,10 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("update_votes", games[roomId].votes);
 
     const activePlayers = games[roomId].players.filter(p => !p.isEliminated);
-    if (games[roomId].votes.length === activePlayers.length) {
+    const connectedActivePlayers = activePlayers.filter(p => !p.isDisconnected);
+    
+    // Ne compter que les votes des joueurs connectés
+    if (games[roomId].votes.length >= connectedActivePlayers.length) {
       const results = getResults(games[roomId]);
       
       if (results.isGameOver) {
@@ -300,8 +416,17 @@ io.on("connection", (socket) => {
       if (player) {
         updatePlayerDisconnection(game, socket.id);
         console.log(`${player.username} s'est déconnecté de la room ${game.roomId}`);
+        
+        // Si une partie est en cours, marquer le joueur comme déconnecté mais le garder dans la logique
+        if (game.status !== "WAITING") {
+          player.isDisconnected = true;
+          // Garder le joueur dans la liste mais marquer comme déconnecté
+          io.to(game.roomId).emit("update_players", game.players);
+          return;
+        }
       }
       
+      // Si en attente, retirer complètement le joueur
       game.players = game.players.filter(p => p.id !== socket.id);
       
       // Si l'hôte se déconnecte et qu'il reste des joueurs, transférer le statut d'hôte

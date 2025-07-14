@@ -148,7 +148,12 @@ export default function App() {
       setCards(cards || []);
       setVotes(votes || []);
       setOrder(turnOrder || []);
-      setCurrentPlayerId(turnOrder && turnOrder[currentTurn] ? turnOrder[currentTurn] : null);
+      
+      
+      const currentPlayerInTurn = turnOrder && typeof currentTurn === 'number' && turnOrder[currentTurn] 
+        ? turnOrder[currentTurn] 
+        : null;
+      setCurrentPlayerId(currentPlayerInTurn);
       
       const currentPlayerCard = cards?.find(card => card.playerId === socket.id);
       if (currentPlayerCard) {
@@ -467,7 +472,20 @@ export default function App() {
                           {currentPlayerId === socket.id ? (
                             "C'est votre tour ! Créez votre prompt."
                           ) : (
-                            <>C'est au tour de <span className="font-bold text-blue-300">{players.find(p => p.id === currentPlayerId)?.username}</span> de créer son prompt...</>
+                            (() => {
+                              const currentPlayer = players.find(p => p.id === currentPlayerId);
+                              const isDisconnected = currentPlayer?.isDisconnected;
+                              return (
+                                <>
+                                  C'est au tour de <span className="font-bold text-blue-300">{currentPlayer?.username}</span> de créer son prompt...
+                                  {isDisconnected && (
+                                    <div className="mt-2 text-sm text-orange-300">
+                                      ⚠️ Le joueur est déconnecté, attente de son retour...
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()
                           )}
                         </p>
                       </div>
