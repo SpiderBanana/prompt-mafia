@@ -5,6 +5,7 @@ import ChatBox from "./components/ChatBox";
 import PlayerSidebar from "./components/PlayerSidebar";
 import Timer from "./components/Timer";
 import VoteZone from "./components/VoteZone";
+import { checkForForbiddenWord } from "./utils/wordDetection";
 
 // Configuration dynamique de l'URL du serveur
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 
@@ -31,6 +32,7 @@ export default function App() {
   const [voteConfirmed, setVoteConfirmed] = useState(false);  const [result, setResult] = useState(null);
   const [isPromptSubmitted, setIsPromptSubmitted] = useState(false);
   const [eliminatedPlayers, setEliminatedPlayers] = useState([]);
+  const [promptError, setPromptError] = useState(""); // Nouvel état pour les erreurs de prompt
   
   // États pour le système multi-round
   const [round, setRound] = useState(1);
@@ -117,6 +119,13 @@ export default function App() {
         setVoteConfirmed(true);
       }
     });
+
+    // Nouvel événement pour gérer les prompts rejetés
+    socket.on("prompt_rejected", ({ error, originalPrompt }) => {
+      console.log("Prompt rejeté:", error);
+      setPromptError(error);
+      setIsPromptSubmitted(false); // Permettre une nouvelle soumission
+    });
       return () => {
       socket.off("update_players");
       socket.off("assign_roles");
@@ -130,6 +139,7 @@ export default function App() {
       socket.off("game_over");
       socket.off("new_round");
       socket.off("rejoin_game");
+      socket.off("prompt_rejected");
     };
   }, []);  
   const restartGame = () => {
@@ -147,6 +157,7 @@ export default function App() {
     setRound(1);
     setRoundResult(null);
     setRevealedCards([]);
+    setPromptError(""); // Réinitialiser les erreurs de prompt
   };
 
   // Écran de connexion
@@ -304,9 +315,12 @@ export default function App() {
                     onSubmit={prompt => {
                       socket.emit("submit_prompt", { roomId, prompt });
                       setIsPromptSubmitted(true);
+                      setPromptError(""); // Effacer les erreurs précédentes
                     }}
                     isSubmitted={false}
                     myWord={myWord}
+                    promptError={promptError}
+                    onErrorClear={() => setPromptError("")}
                   />
                 ) : (
                   <>
@@ -506,38 +520,21 @@ export default function App() {
 }
 
 // Composant formulaire de prompt
-function PromptForm({ onSubmit, myWord }) {
+function PromptForm({ onSubmit, myWord, promptError = "", onErrorClear }) {
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState("");
-  
-  // Vérifier si le mot-clé est présent dans le prompt
-  const checkForForbiddenWord = (text) => {
-    if (!myWord) return false;
-    
-    // Nettoyer le texte et le mot pour une comparaison insensible à la casse
-    const cleanText = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const cleanWord = myWord.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    // Vérifier si le mot exact ou ses variantes sont présents
-    const wordVariations = [
-      cleanWord,
-      cleanWord + 's', 
-      cleanWord + 'e', 
-      cleanWord + 'es', 
-    ];
-    
-    return wordVariations.some(variation => 
-      cleanText.includes(variation) || 
-      cleanText.split(/\W+/).includes(variation)
-    );
-  };
   
   const handlePromptChange = (e) => {
     const newPrompt = e.target.value;
     setPrompt(newPrompt);
     
-    if (checkForForbiddenWord(newPrompt)) {
-      setError(`⚠️ Vous ne pouvez pas utiliser le mot "${myWord}" dans votre prompt !`);
+    // Effacer l'erreur du serveur quand l'utilisateur tape
+    if (promptError && onErrorClear) {
+      onErrorClear();
+    }
+    
+    if (checkForForbiddenWord(newPrompt, myWord)) {
+      setError(`⚠️ Votre prompt contient un mot trop similaire à "${myWord}" ! Soyez plus créatif.`);
     } else {
       setError("");
     }
@@ -545,18 +542,37 @@ function PromptForm({ onSubmit, myWord }) {
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (prompt.trim() && !checkForForbiddenWord(prompt)) {
+    if (prompt.trim() && !checkForForbiddenWord(prompt, myWord)) {
       onSubmit(prompt);
       setPrompt("");
       setError("");
     }
   };
   
-  const isValid = prompt.trim() && !checkForForbiddenWord(prompt);
+  const isValid = prompt.trim() && !checkForForbiddenWord(prompt, myWord);
   
   return (
     <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-6 border border-white/20">
       <h2 className="text-3xl font-bold text-center mb-6 text-white">À votre tour !</h2>
+      
+      {/* Affichage de l'erreur du serveur (prompt rejeté) */}
+      {promptError && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-400/30 rounded-xl">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-medium text-red-300 mb-1">Prompt rejeté</h3>
+              <p className="text-red-200 text-sm">{promptError}</p>
+              <p className="text-red-100 text-xs mt-2">Veuillez modifier votre prompt et réessayer.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <form
         className="flex flex-col gap-6"
         onSubmit={handleSubmit}
@@ -584,7 +600,7 @@ function PromptForm({ onSubmit, myWord }) {
           }`}
           disabled={!isValid}
         >
-          Envoyer mon prompt
+          {promptError ? 'Renvoyer le prompt' : 'Envoyer mon prompt'}
         </button>
       </form>
     </div>

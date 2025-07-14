@@ -17,9 +17,8 @@ const openai = new OpenAI({
  */
 async function generateImage(prompt) {
   if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
-    const fallbackUrl = `https://picsum.photos/400/400?random=${Date.now()}`;
-    console.log('Pas de clé OpenAI configurée, utilisation d\'une image placeholder');
-    return fallbackUrl;
+    console.log('Pas de clé OpenAI configurée');
+    throw new Error('OPENAI_API_KEY_MISSING');
   }
 
   try {
@@ -41,13 +40,17 @@ async function generateImage(prompt) {
     
     if (error.code === 'invalid_api_key') {
       console.error('Clé API OpenAI invalide. Vérifiez votre clé dans le fichier .env');
+      throw new Error('INVALID_API_KEY');
     } else if (error.code === 'insufficient_quota') {
       console.error('Quota OpenAI insuffisant. Vérifiez votre solde sur platform.openai.com');
+      throw new Error('INSUFFICIENT_QUOTA');
+    } else if (error.status === 400 && error.error?.code === 'content_policy_violation') {
+      console.error('Contenu du prompt violant les politiques OpenAI');
+      throw new Error('CONTENT_POLICY_VIOLATION');
     }
     
-    const fallbackUrl = `https://picsum.photos/400/400?random=${Date.now()}`;
-    console.log('Utilisation d\'une image de fallback:', fallbackUrl);
-    return fallbackUrl;
+    // Pour toute autre erreur, on lève l'erreur au lieu de retourner une image fallback
+    throw error;
   }
 }
 

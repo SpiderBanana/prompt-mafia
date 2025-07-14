@@ -114,8 +114,6 @@ io.on("connection", (socket) => {
       return;
     }
     
-    player.hasSubmittedPrompt = true;
-    
     console.log(`${player.username} a soumis un prompt: ${prompt}`);
     
     let imageUrl;
@@ -125,28 +123,41 @@ io.on("connection", (socket) => {
       imageUrl = await generateImageWithDelay(prompt);
       console.log(`Image générée avec succès pour ${player.username}: ${imageUrl}`);
       
+      // Marquer le joueur comme ayant soumis avec succès
+      player.hasSubmittedPrompt = true;
+      
+      card = {
+        playerId: socket.id,
+        username: player.username,
+        prompt: prompt, 
+        imageUrl: imageUrl
+      };
+      
+      game.cards.push(card);
+
+      // Diffuser la nouvelle image (sans le prompt pour garder le secret)
+      const cardForBroadcast = {
+        playerId: socket.id,
+        username: player.username,
+        imageUrl: imageUrl
+      };
+      io.to(roomId).emit("new_image_broadcast", cardForBroadcast);
+      
     } catch (error) {
       console.error('Erreur lors de la génération d\'image:', error);
-      imageUrl = `https://picsum.photos/400/400?random=${Date.now()}-${socket.id}`;
-      console.log(`Utilisation d'une image placeholder: ${imageUrl}`);
+      
+      // Ne pas marquer le joueur comme ayant soumis - permettre une nouvelle tentative
+      player.hasSubmittedPrompt = false;
+      
+      // Envoyer un événement d'erreur au joueur spécifiquement
+      socket.emit("prompt_rejected", { 
+        error: "Votre prompt n'est pas conforme aux règles d'OpenAI. Veuillez reformuler votre demande en évitant tout contenu inapproprié.", 
+        originalPrompt: prompt 
+      });
+      
+      if (cb) cb({ error: "Prompt rejeté, veuillez reformuler" });
+      return;
     }
-    
-    card = {
-      playerId: socket.id,
-      username: player.username,
-      prompt: prompt, 
-      imageUrl: imageUrl
-    };
-    
-    game.cards.push(card);
-
-    // Diffuser la nouvelle image (sans le prompt pour garder le secret)
-    const cardForBroadcast = {
-      playerId: socket.id,
-      username: player.username,
-      imageUrl: imageUrl
-    };
-    io.to(roomId).emit("new_image_broadcast", cardForBroadcast);
 
     // Vérifier si tous les joueurs actifs ont soumis leur prompt
     const activePlayers = game.players.filter(p => !p.isEliminated);

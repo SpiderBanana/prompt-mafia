@@ -17,10 +17,7 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
 
   const allCards = [...cards, ...ghostCards];
 
-  // Fonction pour vérifier si une image est une image de backup
-  const isBackupImage = (imageUrl) => {
-    return imageUrl && imageUrl.includes('picsum.photos');
-  };
+
 
   // Fonction pour vérifier si un joueur est éliminé
   const isPlayerEliminated = (playerId) => {
@@ -80,18 +77,6 @@ export default function CardGallery({ cards, votes, currentUserId, players = [],
                     </p>
                   </>
                 )}
-              </div>
-            ) : isBackupImage(card.imageUrl) ? (
-              // Image censurée (fallback)
-              <div className="w-full h-full bg-gradient-to-br from-red-900/30 to-red-800/30 flex flex-col items-center justify-center relative">
-                <div className="relative z-10 text-center">
-                  <p className="text-red-300 text-lg font-bold">
-                    CENSURÉ
-                  </p>
-                  <p className="text-red-200 text-xs mt-1">
-                    Contenu non généré
-                  </p>
-                </div>
               </div>
             ) : (
               // Image réelle
