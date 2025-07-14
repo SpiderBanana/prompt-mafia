@@ -33,11 +33,50 @@ export default function App() {
   const [isPromptSubmitted, setIsPromptSubmitted] = useState(false);
   const [eliminatedPlayers, setEliminatedPlayers] = useState([]);
   const [promptError, setPromptError] = useState(""); // Nouvel état pour les erreurs de prompt
+  const [isFullscreen, setIsFullscreen] = useState(false); // État pour le plein écran
   
   // États pour le système multi-round
   const [round, setRound] = useState(1);
   const [roundResult, setRoundResult] = useState(null);
   const [revealedCards, setRevealedCards] = useState([]);
+
+  // Fonction pour gérer le plein écran
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      // Entrer en plein écran
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch((err) => {
+        console.error(`Erreur lors de l'activation du plein écran: ${err.message}`);
+      });
+    } else {
+      // Sortir du plein écran
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      }).catch((err) => {
+        console.error(`Erreur lors de la désactivation du plein écran: ${err.message}`);
+      });
+    }
+  };
+
+  // Écouter les changements de plein écran
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
 
   // Handlers Socket.IO
   useEffect(() => {
@@ -166,7 +205,24 @@ export default function App() {
   // Écran de connexion
   if (!joined) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center p-4 relative">
+        {/* Bouton plein écran sur l'écran de connexion */}
+        <button
+          onClick={toggleFullscreen}
+          className="absolute top-4 right-4 p-2 lg:p-3 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-xl transition-all duration-200 text-white group z-10"
+          title={isFullscreen ? "Quitter le plein écran" : "Mode plein écran"}
+        >
+          {isFullscreen ? (
+            <svg className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          )}
+        </button>
+        
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -233,6 +289,61 @@ export default function App() {
               isMobile={true}
             />
           </div>
+          
+          {/* Panneau lobby mobile - en dessous du menu des joueurs */}
+          {phase === "WAITING" && (
+            <div className="lg:hidden bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-4 mb-4 border border-white/20 relative">
+              {/* Bouton plein écran sur le panneau lobby mobile */}
+              <button
+                onClick={toggleFullscreen}
+                className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-xl transition-all duration-200 text-white group"
+                title={isFullscreen ? "Quitter le plein écran" : "Mode plein écran"}
+              >
+                {isFullscreen ? (
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                  </svg>
+                )}
+              </button>
+              
+              <h1 className="text-2xl font-bold mb-4 text-purple-400 text-center">
+                Subterfuge
+              </h1>
+              
+              <div className="text-center">
+                <h2 className="text-lg font-semibold mb-2 text-white">
+                  Joueurs connectés ({players.length})
+                </h2>
+                <p className="text-xs text-gray-300 mb-4">
+                  {isHost ? "Vous êtes l'hôte de cette room" : "En attente de l'hôte..."}
+                </p>
+                
+                {players.length >= 3 ? (
+                  isHost ? (
+                    <button
+                      onClick={() => socket.emit("start_game", { roomId })}
+                      className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:bg-white/20 hover:border-blue-400/40 text-white font-bold py-3 px-6 rounded-2xl text-base transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 w-full"
+                    >
+                      Démarrer la partie
+                    </button>
+                  ) : (
+                    <p className="text-gray-300 text-base">
+                      Attendez que l'hôte démarre la partie...
+                    </p>
+                  )
+                ) : (
+                  <p className="text-gray-300 text-base">
+                    Attendez au moins 3 joueurs pour commencer... ({players.length}/3)
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+          
           <div className="hidden lg:flex lg:flex-col lg:h-full">
             <PlayerSidebar 
               players={players}
@@ -245,11 +356,28 @@ export default function App() {
         </div>
         
         {/* Contenu principal */}
-        <div className="flex-1 flex flex-col lg:ml-[calc(20%+2rem)] lg:mr-[calc(20%+2rem)] p-4 lg:p-4 pb-20 lg:pb-4">
+        <div className={`flex-1 flex flex-col lg:ml-[calc(20%+2rem)] lg:mr-[calc(20%+2rem)] p-4 lg:p-4 pb-20 lg:pb-4 ${phase === "WAITING" ? "lg:justify-center" : ""}`}>
           {/* Phase d'attente */}
           {phase === "WAITING" && (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-6 lg:p-12 text-center border border-white/20 w-full max-w-4xl">
+            <div className="hidden lg:flex flex-1 items-center justify-center">
+              <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-6 lg:p-12 text-center border border-white/20 w-full max-w-4xl relative">
+                {/* Bouton plein écran sur l'écran d'attente */}
+                <button
+                  onClick={toggleFullscreen}
+                  className="absolute top-4 right-4 p-2 lg:p-3 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-xl transition-all duration-200 text-white group"
+                  title={isFullscreen ? "Quitter le plein écran" : "Mode plein écran"}
+                >
+                  {isFullscreen ? (
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                  )}
+                </button>
+                
                 <h1 className="text-3xl lg:text-5xl font-bold mb-6 lg:mb-8 text-purple-400">
                   Subterfuge
                 </h1>
@@ -302,9 +430,30 @@ export default function App() {
           {phase !== "WAITING" && (
             <div className="flex-1 flex flex-col">
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-4 lg:p-6 mb-4 lg:mb-6 border border-white/20">
-                <h1 className="text-2xl lg:text-3xl font-bold text-center mb-2 lg:mb-4 text-purple-400">
-                  Subterfuge
-                </h1>
+                <div className="flex items-center justify-between mb-2 lg:mb-4">
+                  <h1 className="text-2xl lg:text-3xl font-bold text-purple-400">
+                    Subterfuge
+                  </h1>
+                  
+                  {/* Bouton plein écran */}
+                  <button
+                    onClick={toggleFullscreen}
+                    className="p-2 lg:p-3 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-xl transition-all duration-200 text-white group"
+                    title={isFullscreen ? "Quitter le plein écran" : "Mode plein écran"}
+                  >
+                    {isFullscreen ? (
+                      // Icône réduire
+                      <svg className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    ) : (
+                      // Icône agrandir
+                      <svg className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
                 
                 {/* Notification du tour actuel */}
                 {phase === "PROMPT" && currentPlayerId && (
