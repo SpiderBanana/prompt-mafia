@@ -478,15 +478,6 @@ export default function App() {
               
               {/* Contenu principal scrollable */}
               <div className="flex-1 overflow-y-auto">
-                <CardGallery 
-                  cards={cards} 
-                  votes={votes} 
-                  currentUserId={socket.id}
-                  players={players}
-                  currentPlayerId={currentPlayerId}
-                  eliminatedPlayers={eliminatedPlayers}
-                />
-                
                 {phase === "PROMPT" && currentPlayerId === socket.id && !isPromptSubmitted && (
                   <PromptForm 
                     onSubmit={prompt => {
@@ -512,6 +503,15 @@ export default function App() {
                     </div>
                   </div>
                 )}
+                
+                <CardGallery 
+                  cards={cards} 
+                  votes={votes} 
+                  currentUserId={socket.id}
+                  players={players}
+                  currentPlayerId={currentPlayerId}
+                  eliminatedPlayers={eliminatedPlayers}
+                />
                 
                 {/* Phase de discussion et vote */}
                 {phase === "DISCUSSION" && (
